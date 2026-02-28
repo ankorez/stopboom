@@ -1,0 +1,10 @@
+{
+  "threshold": 0.15,
+  "pre_boom_seconds": 1.0,
+  "post_boom_seconds": 1.5,
+  "cooldown_seconds": 5,
+  "sample_rate": 16000,
+  "channels": 1,
+  "device": 1,
+  "alsa_device": "plughw:1,0"
+}

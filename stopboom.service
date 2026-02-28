@@ -1,0 +1,14 @@
+[Unit]
+Description=StopBoom - Détection et réponse aux booms
+After=sound.target
+
+[Service]
+Type=simple
+User=ankorez
+WorkingDirectory=/home/ankorez/stopboom
+ExecStart=/home/ankorez/stopboom/venv/bin/python3 /home/ankorez/stopboom/stopboom.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
