@@ -103,6 +103,34 @@
             color: #666;
         }
 
+        /* Volume */
+        .volume-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .volume-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: #0f3460;
+            outline: none;
+        }
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4ecca3;
+            cursor: pointer;
+        }
+        .volume-value {
+            min-width: 40px;
+            text-align: right;
+            font-weight: bold;
+        }
+
         /* History */
         .history-list {
             max-height: 300px;
@@ -201,6 +229,14 @@
                 <span>0</span>
                 <span id="rmsValue">RMS: 0.0000</span>
                 <span>1.0</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Volume de sortie</h2>
+            <div class="volume-row">
+                <input type="range" class="volume-slider" id="volumeSlider" min="0" max="11" step="1" value="11">
+                <span class="volume-value" id="volumeValue">11</span>
             </div>
         </div>
 
@@ -330,6 +366,20 @@
             fb.style.opacity = 1;
             setTimeout(function() { fb.style.opacity = 0; }, 2000);
         }
+
+        // Volume slider
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeValue = document.getElementById('volumeValue');
+        volumeSlider.addEventListener('input', function() {
+            volumeValue.textContent = this.value;
+            socket.emit('set_volume', { level: parseInt(this.value) });
+        });
+
+        socket.on('volume', function(data) {
+            volumeSlider.value = data.level;
+            volumeSlider.max = data.max;
+            volumeValue.textContent = data.level;
+        });
 
         updateThresholdLine();
     </script>

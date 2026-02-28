@@ -119,6 +119,48 @@ def play_audio(audio, sr, alsa_device, out_sr):
     os.unlink(tmp_path)
 
 
+def get_alsa_card():
+    """Extrait le numéro de carte depuis alsa_device (ex: plughw:1,0 -> 1)."""
+    alsa = state["config"].get("alsa_device", "plughw:1,0")
+    try:
+        return alsa.split(":")[1].split(",")[0]
+    except (IndexError, ValueError):
+        return "1"
+
+
+def get_volume():
+    """Lit le volume actuel et max via amixer."""
+    card = get_alsa_card()
+    try:
+        result = subprocess.run(
+            ["amixer", "-c", card, "cget", "numid=3"],
+            capture_output=True, text=True
+        )
+        output = result.stdout
+        # Parse max
+        max_vol = 11
+        for line in output.split("\n"):
+            if "max=" in line:
+                for part in line.split(","):
+                    if part.strip().startswith("max="):
+                        max_vol = int(part.strip().split("=")[1])
+            if ": values=" in line:
+                level = int(line.strip().split("=")[1])
+                return level, max_vol
+    except Exception:
+        pass
+    return 11, 11
+
+
+def set_volume(level):
+    """Change le volume via amixer."""
+    card = get_alsa_card()
+    subprocess.run(
+        ["amixer", "-c", card, "cset", "numid=3", str(level)],
+        capture_output=True
+    )
+
+
 # --- Flask routes ---
 
 @app.route("/")
@@ -134,6 +176,9 @@ def on_connect():
         "pre_boom_seconds": state["config"].get("pre_boom_seconds", 1.0),
         "post_boom_seconds": state["config"].get("post_boom_seconds", 1.5),
     })
+    # Send current volume
+    level, max_vol = get_volume()
+    socketio.emit("volume", {"level": level, "max": max_vol})
     # Reset today count if new day
     if state["today_date"] != str(date.today()):
         state["today_date"] = str(date.today())
@@ -158,6 +203,13 @@ def on_save_config(data):
     save_config(cfg)
     state["config"] = cfg
     log.info("Config mise à jour depuis le dashboard")
+
+
+@socketio.on("set_volume")
+def on_set_volume(data):
+    level = int(data["level"])
+    set_volume(level)
+    log.info("Volume changé à %d depuis le dashboard", level)
 
 
 # --- Audio detection thread ---
