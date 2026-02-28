@@ -172,9 +172,18 @@
             color: #888;
             margin-bottom: 4px;
         }
-        .setting-item input {
+        .setting-item input, .setting-item select {
             width: 100%;
             padding: 8px;
+            border: 1px solid #0f3460;
+            border-radius: 6px;
+            background: #1a1a2e;
+            color: #eee;
+            font-size: 16px;
+        }
+        .sound-select {
+            width: 100%;
+            padding: 10px;
             border: 1px solid #0f3460;
             border-radius: 6px;
             background: #1a1a2e;
@@ -251,6 +260,13 @@
                 <input type="range" class="volume-slider" id="volumeSlider" min="0" max="11" step="1" value="11">
                 <span class="volume-value" id="volumeValue">11</span>
             </div>
+        </div>
+
+        <div class="card">
+            <h2>Son de reponse</h2>
+            <select class="sound-select" id="replayMode" onchange="setReplayMode(this.value)">
+                <option value="echo">Echo (rejouer le boom)</option>
+            </select>
         </div>
 
         <div class="card">
@@ -335,6 +351,32 @@
 
         function toggleEnabled() {
             socket.emit('toggle_enabled');
+        }
+
+        // Replay mode
+        const soundLabels = {
+            echo: 'Echo (rejouer le boom)',
+            alarm: 'Alarme',
+            doorbell: 'Sonnette',
+            hammer: 'Marteau',
+            honk: 'Klaxon',
+            siren: 'Sirene'
+        };
+
+        socket.on('replay_mode', function(data) {
+            const sel = document.getElementById('replayMode');
+            sel.innerHTML = '';
+            data.available.forEach(function(s) {
+                const opt = document.createElement('option');
+                opt.value = s;
+                opt.textContent = soundLabels[s] || s;
+                if (s === data.mode) opt.selected = true;
+                sel.appendChild(opt);
+            });
+        });
+
+        function setReplayMode(mode) {
+            socket.emit('set_replay_mode', { mode: mode });
         }
 
         // Boom detection event

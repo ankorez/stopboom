@@ -7,5 +7,6 @@
   "channels": 1,
   "device": null,
   "alsa_device": "plughw:1,0",
-  "output_sample_rate": 48000
+  "output_sample_rate": 48000,
+  "replay_mode": "echo"
 }

@@ -77,7 +77,8 @@ Editer `config.json` via le dashboard web (applique en temps reel) ou manuelleme
   "channels": 1,
   "device": null,
   "alsa_device": "plughw:1,0",
-  "output_sample_rate": 48000
+  "output_sample_rate": 48000,
+  "replay_mode": "echo"
 }
 ```
 
@@ -92,6 +93,7 @@ Editer `config.json` via le dashboard web (applique en temps reel) ou manuelleme
 | `device` | Index du device sounddevice pour la capture. `null` = auto-detection du premier device USB. |
 | `alsa_device` | Device ALSA pour la lecture (ex: `plughw:1,0`). |
 | `output_sample_rate` | Frequence de sortie pour la lecture (48000 recommande). |
+| `replay_mode` | Son joue apres detection : `echo` (rejouer le boom), `alarm`, `doorbell`, `hammer`, `honk`, `siren`. |
 | `web_port` | Port du dashboard web (5000 par defaut). |
 
 ### Trouver les devices audio

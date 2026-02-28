@@ -121,6 +121,20 @@ def play_audio(audio, sr, alsa_device, out_sr):
     os.unlink(tmp_path)
 
 
+SOUNDS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sounds")
+
+AVAILABLE_SOUNDS = ["echo", "alarm", "doorbell", "hammer", "honk", "siren"]
+
+
+def play_sound_file(name, alsa_device):
+    """Joue un fichier wav prédéfini."""
+    path = os.path.join(SOUNDS_DIR, f"{name}.wav")
+    if not os.path.exists(path):
+        log.error("Son introuvable: %s", path)
+        return
+    subprocess.run(["aplay", "-D", alsa_device, path], capture_output=True)
+
+
 def get_alsa_card():
     """Extrait le numéro de carte depuis alsa_device (ex: plughw:1,0 -> 1)."""
     alsa = state["config"].get("alsa_device", "plughw:1,0")
@@ -179,6 +193,10 @@ def on_connect():
         "post_boom_seconds": state["config"].get("post_boom_seconds", 1.5),
     })
     socketio.emit("enabled_state", {"enabled": state["enabled"]})
+    socketio.emit("replay_mode", {
+        "mode": state["config"].get("replay_mode", "echo"),
+        "available": AVAILABLE_SOUNDS,
+    })
     # Send current volume
     level, max_vol = get_volume()
     socketio.emit("volume", {"level": level, "max": max_vol})
@@ -213,6 +231,19 @@ def on_set_volume(data):
     level = int(data["level"])
     set_volume(level)
     log.info("Volume changé à %d depuis le dashboard", level)
+
+
+@socketio.on("set_replay_mode")
+def on_set_replay_mode(data):
+    mode = data["mode"]
+    if mode in AVAILABLE_SOUNDS:
+        state["config"]["replay_mode"] = mode
+        save_config(state["config"])
+        socketio.emit("replay_mode", {
+            "mode": mode,
+            "available": AVAILABLE_SOUNDS,
+        })
+        log.info("Mode replay changé à '%s' depuis le dashboard", mode)
 
 
 @socketio.on("toggle_enabled")
@@ -359,9 +390,13 @@ def audio_loop():
                 duration = len(boom_audio) / sr
                 boom_rms = float(rms(boom_audio))
 
-                log.info("Lecture du boom (%.2fs)...", duration)
+                replay_mode = state["config"].get("replay_mode", "echo")
+                log.info("Lecture du boom (%.2fs, mode=%s)...", duration, replay_mode)
                 socketio.emit("status", {"state": "boom"})
-                play_audio(boom_audio, sr, alsa_device, out_sr)
+                if replay_mode == "echo":
+                    play_audio(boom_audio, sr, alsa_device, out_sr)
+                else:
+                    play_sound_file(replay_mode, alsa_device)
                 log.info("Lecture terminée")
 
                 # Log detection
