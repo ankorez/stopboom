@@ -30,11 +30,14 @@ Cela installe les dependances systeme, cree un environnement virtuel Python, et 
 ### 3. Monter le volume du peripherique
 
 ```bash
-# Mettre le volume ALSA au max
-amixer -c 1 cset numid=3 11
+# Lister les controles de volume de la carte audio (remplacer 1 par le numero de carte)
+amixer -c 1 contents
 
-# Utiliser aussi les boutons physiques du peripherique si disponibles
+# Mettre le volume au max (adapter numid et valeur selon la sortie ci-dessus)
+amixer -c 1 cset numid=<id> <max>
 ```
+
+Le volume est aussi reglable depuis le dashboard web.
 
 ## Utilisation
 
