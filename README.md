@@ -35,13 +35,13 @@ chmod +x setup.sh
 
 Cela installe les dependances systeme, cree un environnement virtuel Python, et configure le service systemd.
 
-### 4. Monter le volume du Jabra
+### 4. Monter le volume du peripherique
 
 ```bash
 # Mettre le volume ALSA au max
 amixer -c 1 cset numid=3 11
 
-# Utiliser aussi les boutons physiques + sur le Jabra
+# Utiliser aussi les boutons physiques du peripherique si disponibles
 ```
 
 ## Utilisation

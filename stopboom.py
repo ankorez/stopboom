@@ -36,6 +36,8 @@ state = {
     "today_count": 0,
     "today_date": str(date.today()),
     "config": {},
+    "enabled": True,
+    "cb_state": None,
 }
 
 CONFIG_PATH = "config.json"
@@ -176,6 +178,7 @@ def on_connect():
         "pre_boom_seconds": state["config"].get("pre_boom_seconds", 1.0),
         "post_boom_seconds": state["config"].get("post_boom_seconds", 1.5),
     })
+    socketio.emit("enabled_state", {"enabled": state["enabled"]})
     # Send current volume
     level, max_vol = get_volume()
     socketio.emit("volume", {"level": level, "max": max_vol})
@@ -210,6 +213,19 @@ def on_set_volume(data):
     level = int(data["level"])
     set_volume(level)
     log.info("Volume changé à %d depuis le dashboard", level)
+
+
+@socketio.on("toggle_enabled")
+def on_toggle_enabled():
+    state["enabled"] = not state["enabled"]
+    enabled = state["enabled"]
+    cb = state.get("cb_state")
+    if cb is not None:
+        cb["paused"] = not enabled
+    status = "listening" if enabled else "disabled"
+    socketio.emit("enabled_state", {"enabled": enabled})
+    socketio.emit("status", {"state": status})
+    log.info("StopBoom %s depuis le dashboard", "activé" if enabled else "désactivé")
 
 
 # --- Audio detection thread ---
@@ -247,6 +263,7 @@ def audio_loop():
         "paused": False,
         "post_recording": None,
     }
+    state["cb_state"] = cb_state
 
     def get_cfg_values():
         """Read live config values."""

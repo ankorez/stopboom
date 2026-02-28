@@ -61,6 +61,18 @@
         }
         .status-dot.boom { background: #e23e57; animation: none; }
         .status-dot.cooldown { background: #f0a500; animation: none; }
+        .status-dot.disabled { background: #666; animation: none; }
+        .toggle-btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .toggle-btn.on { background: #4ecca3; color: #1a1a2e; }
+        .toggle-btn.off { background: #666; color: #eee; }
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.4; }
@@ -212,6 +224,7 @@
                     <div class="status-dot" id="statusDot"></div>
                     <span id="statusText">En ecoute...</span>
                 </div>
+                <button class="toggle-btn on" id="toggleBtn" onclick="toggleEnabled()">Actif</button>
                 <div style="text-align: center;">
                     <div class="boom-count" id="boomCount">0</div>
                     <div class="boom-count-label">booms aujourd'hui</div>
@@ -294,7 +307,10 @@
             const dot = document.getElementById('statusDot');
             const text = document.getElementById('statusText');
             dot.className = 'status-dot';
-            if (data.state === 'boom') {
+            if (data.state === 'disabled') {
+                dot.classList.add('disabled');
+                text.textContent = 'Desactive';
+            } else if (data.state === 'boom') {
                 dot.classList.add('boom');
                 text.textContent = 'BOOM detecte !';
             } else if (data.state === 'cooldown') {
@@ -304,6 +320,22 @@
                 text.textContent = 'En ecoute...';
             }
         });
+
+        // Toggle enable/disable
+        socket.on('enabled_state', function(data) {
+            const btn = document.getElementById('toggleBtn');
+            if (data.enabled) {
+                btn.className = 'toggle-btn on';
+                btn.textContent = 'Actif';
+            } else {
+                btn.className = 'toggle-btn off';
+                btn.textContent = 'Desactive';
+            }
+        });
+
+        function toggleEnabled() {
+            socket.emit('toggle_enabled');
+        }
 
         // Boom detection event
         socket.on('boom', function(data) {
