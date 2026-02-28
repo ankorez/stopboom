@@ -1,6 +1,6 @@
 # StopBoom
 
-Detecte les booms des voisins via un speakerphone Jabra USB et les rejoue automatiquement.
+Detecte les booms des voisins et les rejoue automatiquement. Inclut un dashboard web pour le monitoring et la configuration en temps reel.
 
 ## Materiel requis
 
