@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StopBoom</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            min-height: 100vh;
+        }
+        .header {
+            background: #16213e;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #0f3460;
+        }
+        .header h1 { font-size: 24px; }
+        .header .subtitle { color: #888; font-size: 14px; margin-top: 4px; }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .card {
+            background: #16213e;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        .card h2 {
+            font-size: 16px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        /* Status */
+        .status-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .status-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #4ecca3;
+            animation: pulse 2s infinite;
+        }
+        .status-dot.boom { background: #e23e57; animation: none; }
+        .status-dot.cooldown { background: #f0a500; animation: none; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        .boom-count {
+            font-size: 48px;
+            font-weight: bold;
+            color: #e23e57;
+        }
+        .boom-count-label { color: #888; font-size: 14px; }
+
+        /* VU Meter */
+        .vu-container {
+            height: 32px;
+            background: #0f3460;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+        .vu-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #4ecca3, #f0a500, #e23e57);
+            transition: width 0.1s;
+            border-radius: 6px;
+        }
+        .vu-threshold {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 2px;
+            background: #fff;
+            opacity: 0.6;
+        }
+        .vu-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 4px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* History */
+        .history-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #0f3460;
+            font-size: 14px;
+        }
+        .history-item:last-child { border-bottom: none; }
+        .history-time { color: #888; }
+        .history-rms { color: #e23e57; font-weight: bold; }
+        .history-empty { color: #666; text-align: center; padding: 20px; }
+
+        /* Settings */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .setting-item label {
+            display: block;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 4px;
+        }
+        .setting-item input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #0f3460;
+            border-radius: 6px;
+            background: #1a1a2e;
+            color: #eee;
+            font-size: 16px;
+        }
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-save {
+            background: #4ecca3;
+            color: #1a1a2e;
+            margin-top: 12px;
+        }
+        .btn-save:hover { background: #3db88c; }
+        .save-feedback {
+            display: inline-block;
+            margin-left: 12px;
+            color: #4ecca3;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        @media (max-width: 600px) {
+            .settings-grid { grid-template-columns: 1fr; }
+            .status-row { flex-direction: column; gap: 16px; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>StopBoom</h1>
+        <div class="subtitle">Noise Detection & Replay System</div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h2>Statut</h2>
+            <div class="status-row">
+                <div class="status-indicator">
+                    <div class="status-dot" id="statusDot"></div>
+                    <span id="statusText">En ecoute...</span>
+                </div>
+                <div style="text-align: center;">
+                    <div class="boom-count" id="boomCount">0</div>
+                    <div class="boom-count-label">booms aujourd'hui</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Niveau audio</h2>
+            <div class="vu-container">
+                <div class="vu-bar" id="vuBar"></div>
+                <div class="vu-threshold" id="vuThreshold"></div>
+            </div>
+            <div class="vu-labels">
+                <span>0</span>
+                <span id="rmsValue">RMS: 0.0000</span>
+                <span>1.0</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Historique</h2>
+            <div class="history-list" id="historyList">
+                <div class="history-empty">Aucune detection pour le moment</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Configuration</h2>
+            <div class="settings-grid">
+                <div class="setting-item">
+                    <label>Seuil de detection (threshold)</label>
+                    <input type="number" id="threshold" step="0.01" min="0" max="1">
+                </div>
+                <div class="setting-item">
+                    <label>Cooldown (secondes)</label>
+                    <input type="number" id="cooldown_seconds" step="1" min="0">
+                </div>
+                <div class="setting-item">
+                    <label>Pre-boom (secondes)</label>
+                    <input type="number" id="pre_boom_seconds" step="0.1" min="0">
+                </div>
+                <div class="setting-item">
+                    <label>Post-boom (secondes)</label>
+                    <input type="number" id="post_boom_seconds" step="0.1" min="0">
+                </div>
+            </div>
+            <button class="btn btn-save" onclick="saveSettings()">Sauvegarder</button>
+            <span class="save-feedback" id="saveFeedback">Sauvegarde !</span>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.min.js"></script>
+    <script>
+        const socket = io();
+        let threshold = 0.15;
+
+        // Update threshold indicator position
+        function updateThresholdLine() {
+            document.getElementById('vuThreshold').style.left = (threshold * 100) + '%';
+        }
+
+        // Receive real-time audio level
+        socket.on('rms', function(data) {
+            const pct = Math.min(data.level * 100 / 0.5, 100);
+            document.getElementById('vuBar').style.width = pct + '%';
+            document.getElementById('rmsValue').textContent = 'RMS: ' + data.level.toFixed(4);
+        });
+
+        // Status updates
+        socket.on('status', function(data) {
+            const dot = document.getElementById('statusDot');
+            const text = document.getElementById('statusText');
+            dot.className = 'status-dot';
+            if (data.state === 'boom') {
+                dot.classList.add('boom');
+                text.textContent = 'BOOM detecte !';
+            } else if (data.state === 'cooldown') {
+                dot.classList.add('cooldown');
+                text.textContent = 'Cooldown...';
+            } else {
+                text.textContent = 'En ecoute...';
+            }
+        });
+
+        // Boom detection event
+        socket.on('boom', function(data) {
+            document.getElementById('boomCount').textContent = data.today_count;
+
+            const list = document.getElementById('historyList');
+            const empty = list.querySelector('.history-empty');
+            if (empty) empty.remove();
+
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            item.innerHTML = '<span class="history-time">' + data.time + '</span>' +
+                '<span>Duree: ' + data.duration.toFixed(1) + 's</span>' +
+                '<span class="history-rms">RMS: ' + data.rms.toFixed(4) + '</span>';
+            list.insertBefore(item, list.firstChild);
+
+            // Keep max 50
+            while (list.children.length > 50) {
+                list.removeChild(list.lastChild);
+            }
+        });
+
+        // Load config
+        socket.on('config', function(data) {
+            threshold = data.threshold;
+            document.getElementById('threshold').value = data.threshold;
+            document.getElementById('cooldown_seconds').value = data.cooldown_seconds;
+            document.getElementById('pre_boom_seconds').value = data.pre_boom_seconds;
+            document.getElementById('post_boom_seconds').value = data.post_boom_seconds;
+            updateThresholdLine();
+        });
+
+        // Load history
+        socket.on('history', function(data) {
+            const list = document.getElementById('historyList');
+            if (data.items.length === 0) return;
+            list.innerHTML = '';
+            document.getElementById('boomCount').textContent = data.today_count;
+            data.items.forEach(function(item) {
+                const el = document.createElement('div');
+                el.className = 'history-item';
+                el.innerHTML = '<span class="history-time">' + item.time + '</span>' +
+                    '<span>Duree: ' + item.duration.toFixed(1) + 's</span>' +
+                    '<span class="history-rms">RMS: ' + item.rms.toFixed(4) + '</span>';
+                list.appendChild(el);
+            });
+        });
+
+        function saveSettings() {
+            const settings = {
+                threshold: parseFloat(document.getElementById('threshold').value),
+                cooldown_seconds: parseInt(document.getElementById('cooldown_seconds').value),
+                pre_boom_seconds: parseFloat(document.getElementById('pre_boom_seconds').value),
+                post_boom_seconds: parseFloat(document.getElementById('post_boom_seconds').value),
+            };
+            threshold = settings.threshold;
+            updateThresholdLine();
+            socket.emit('save_config', settings);
+            const fb = document.getElementById('saveFeedback');
+            fb.style.opacity = 1;
+            setTimeout(function() { fb.style.opacity = 0; }, 2000);
+        }
+
+        updateThresholdLine();
+    </script>
+</body>
+</html>

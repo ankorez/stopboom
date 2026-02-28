@@ -9,9 +9,14 @@ import wave
 import queue
 import logging
 import tempfile
+import threading
 import subprocess
+from datetime import datetime, date
+
 import numpy as np
 import sounddevice as sd
+from flask import Flask, render_template
+from flask_socketio import SocketIO
 
 logging.basicConfig(
     level=logging.INFO,
@@ -19,19 +24,52 @@ logging.basicConfig(
 )
 log = logging.getLogger("stopboom")
 
+# Flask app
+app = Flask(__name__)
+app.config["SECRET_KEY"] = "stopboom"
+socketio = SocketIO(app, async_mode="threading")
 
-def load_config(path="config.json"):
-    with open(path) as f:
+# State partagé
+state = {
+    "status": "listening",  # listening, boom, cooldown
+    "history": [],
+    "today_count": 0,
+    "today_date": str(date.today()),
+    "config": {},
+}
+
+CONFIG_PATH = "config.json"
+HISTORY_PATH = "history.json"
+
+
+def load_config():
+    with open(CONFIG_PATH) as f:
         return json.load(f)
 
 
+def save_config(cfg):
+    with open(CONFIG_PATH, "w") as f:
+        json.dump(cfg, f, indent=2)
+        f.write("\n")
+
+
+def load_history():
+    if os.path.exists(HISTORY_PATH):
+        with open(HISTORY_PATH) as f:
+            return json.load(f)
+    return []
+
+
+def save_history(history):
+    with open(HISTORY_PATH, "w") as f:
+        json.dump(history[-200:], f)
+
+
 def rms(block):
-    """Calcule le volume RMS d'un bloc audio."""
     return np.sqrt(np.mean(block ** 2))
 
 
 def list_devices():
-    """Affiche les devices audio disponibles."""
     print("\n=== Devices audio disponibles ===\n")
     devices = sd.query_devices()
     for i, d in enumerate(devices):
@@ -49,12 +87,9 @@ def list_devices():
     print('  "device" : index du device avec des canaux input (micro)')
     print('  "alsa_device" : "plughw:<card>,0" pour la sortie')
     print()
-    print("Astuce : lancer 'arecord -l' et 'aplay -l' pour voir les cartes ALSA")
-    print()
 
 
 def detect_device():
-    """Auto-détecte le premier device USB avec entrée et sortie."""
     devices = sd.query_devices()
     for i, d in enumerate(devices):
         name = d["name"].lower()
@@ -64,20 +99,14 @@ def detect_device():
 
 
 def play_audio(audio, sr, alsa_device, out_sr):
-    """Joue l'audio via aplay en stéréo."""
-    # Resample si nécessaire
     if sr != out_sr:
         n_samples = int(len(audio) * out_sr / sr)
         indices = np.linspace(0, len(audio) - 1, n_samples)
         audio = np.interp(indices, np.arange(len(audio)), audio).astype(np.float32)
 
-    # Convertir float32 -> int16
     audio_int16 = (audio * 32767).astype(np.int16)
-
-    # Stéréo (dupliquer le canal mono)
     stereo = np.column_stack([audio_int16, audio_int16])
 
-    # Écrire un fichier wav temporaire
     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
         tmp_path = f.name
         with wave.open(f, "w") as w:
@@ -86,39 +115,69 @@ def play_audio(audio, sr, alsa_device, out_sr):
             w.setframerate(out_sr)
             w.writeframes(stereo.tobytes())
 
-    # Jouer via aplay
-    subprocess.run(["aplay", "-D", alsa_device, tmp_path],
-                   capture_output=True)
-
+    subprocess.run(["aplay", "-D", alsa_device, tmp_path], capture_output=True)
     os.unlink(tmp_path)
 
 
-def main():
-    if "--list-devices" in sys.argv:
-        list_devices()
-        return
+# --- Flask routes ---
 
-    cfg = load_config()
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+
+@socketio.on("connect")
+def on_connect():
+    socketio.emit("config", {
+        "threshold": state["config"].get("threshold", 0.15),
+        "cooldown_seconds": state["config"].get("cooldown_seconds", 5),
+        "pre_boom_seconds": state["config"].get("pre_boom_seconds", 1.0),
+        "post_boom_seconds": state["config"].get("post_boom_seconds", 1.5),
+    })
+    # Reset today count if new day
+    if state["today_date"] != str(date.today()):
+        state["today_date"] = str(date.today())
+        state["today_count"] = 0
+    # Send recent history
+    today = str(date.today())
+    today_items = [h for h in state["history"] if h.get("date") == today]
+    state["today_count"] = len(today_items)
+    socketio.emit("history", {
+        "items": list(reversed(today_items[-50:])),
+        "today_count": state["today_count"],
+    })
+
+
+@socketio.on("save_config")
+def on_save_config(data):
+    cfg = state["config"]
+    cfg["threshold"] = data["threshold"]
+    cfg["cooldown_seconds"] = data["cooldown_seconds"]
+    cfg["pre_boom_seconds"] = data["pre_boom_seconds"]
+    cfg["post_boom_seconds"] = data["post_boom_seconds"]
+    save_config(cfg)
+    state["config"] = cfg
+    log.info("Config mise à jour depuis le dashboard")
+
+
+# --- Audio detection thread ---
+
+def audio_loop():
+    cfg = state["config"]
     channels = cfg["channels"]
-    threshold = cfg["threshold"]
-    pre_seconds = cfg["pre_boom_seconds"]
-    post_seconds = cfg["post_boom_seconds"]
-    cooldown = cfg["cooldown_seconds"]
     device = cfg["device"]
     alsa_device = cfg.get("alsa_device", "plughw:1,0")
     out_sr = cfg.get("output_sample_rate", 48000)
 
-    # Auto-détection du device si null
     if device is None:
         idx, dev_info = detect_device()
         if idx is not None:
             device = idx
             log.info("Device auto-détecté: [%d] %s", idx, dev_info["name"])
         else:
-            log.error("Aucun device USB détecté. Lancer avec --list-devices pour voir les devices disponibles.")
-            sys.exit(1)
+            log.error("Aucun device USB détecté.")
+            return
 
-    # Récupérer le sample rate du device
     dev_info = sd.query_devices(device)
     sr = cfg.get("sample_rate")
     if sr is None or sr == 0:
@@ -126,74 +185,88 @@ def main():
         log.info("Sample rate auto-détecté: %d Hz", sr)
 
     block_size = 1024
-    pre_samples = int(sr * pre_seconds)
-    post_samples = int(sr * post_seconds)
-
-    # Buffer circulaire pour garder l'audio avant le boom
-    buffer_len = int(sr * (pre_seconds + 1))
-    ring = np.zeros((buffer_len, channels), dtype=np.float32)
-    write_pos = 0
-
-    log.info("StopBoom démarré")
-    log.info("  threshold=%.2f  pre=%.1fs  post=%.1fs  cooldown=%ds",
-             threshold, pre_seconds, post_seconds, cooldown)
-    log.info("  device=[%s] %s", device, dev_info["name"])
-    log.info("  alsa_device=%s  sr=%d  out_sr=%d  channels=%d",
-             alsa_device, sr, out_sr, channels)
-
-    boom_detected = False
-    post_recording = None
-    post_recorded = 0
-    paused = False
-
-    # Queue pour envoyer l'audio capturé au thread principal
     boom_queue = queue.Queue()
 
+    # Mutable state for callback
+    cb_state = {
+        "write_pos": 0,
+        "boom_detected": False,
+        "post_recorded": 0,
+        "paused": False,
+        "post_recording": None,
+    }
+
+    def get_cfg_values():
+        """Read live config values."""
+        c = state["config"]
+        return (
+            c.get("threshold", 0.15),
+            int(sr * c.get("pre_boom_seconds", 1.0)),
+            int(sr * c.get("post_boom_seconds", 1.5)),
+            c.get("cooldown_seconds", 5),
+        )
+
+    threshold, pre_samples, post_samples, cooldown = get_cfg_values()
+    buffer_len = int(sr * 3)  # 3 seconds buffer
+    ring = np.zeros((buffer_len, channels), dtype=np.float32)
+
+    rms_counter = 0
+
     def callback(indata, frames, time_info, status):
-        nonlocal write_pos, boom_detected, post_recording, post_recorded, paused
+        nonlocal rms_counter
+        s = cb_state
 
         if status:
             log.warning("Audio status: %s", status)
 
-        if paused:
+        if s["paused"]:
             return
 
-        # Si on est en train d'enregistrer le post-boom
-        if boom_detected:
-            remaining = post_samples - post_recorded
-            to_copy = min(frames, remaining)
-            post_recording[post_recorded:post_recorded + to_copy] = indata[:to_copy]
-            post_recorded += to_copy
+        threshold, pre_samples, post_samples, _ = get_cfg_values()
 
-            if post_recorded >= post_samples:
-                boom_detected = False
-                # Assembler pre-boom + post-boom
-                pre_start = (write_pos - pre_samples) % buffer_len
-                if pre_start < write_pos:
-                    pre_audio = ring[pre_start:write_pos].copy()
+        if s["boom_detected"]:
+            remaining = post_samples - s["post_recorded"]
+            to_copy = min(frames, remaining)
+            s["post_recording"][s["post_recorded"]:s["post_recorded"] + to_copy] = indata[:to_copy]
+            s["post_recorded"] += to_copy
+
+            if s["post_recorded"] >= post_samples:
+                s["boom_detected"] = False
+                pre_start = (s["write_pos"] - pre_samples) % buffer_len
+                if pre_start < s["write_pos"]:
+                    pre_audio = ring[pre_start:s["write_pos"]].copy()
                 else:
                     pre_audio = np.concatenate([
                         ring[pre_start:],
-                        ring[:write_pos]
+                        ring[:s["write_pos"]]
                     ])
-                boom_audio = np.concatenate([pre_audio, post_recording])
-                # Envoyer au thread principal pour playback
-                paused = True
+                boom_audio = np.concatenate([pre_audio, s["post_recording"]])
+                s["paused"] = True
                 boom_queue.put(boom_audio)
             return
 
-        # Écrire dans le buffer circulaire
         for i in range(frames):
-            ring[write_pos] = indata[i]
-            write_pos = (write_pos + 1) % buffer_len
+            ring[s["write_pos"]] = indata[i]
+            s["write_pos"] = (s["write_pos"] + 1) % buffer_len
 
-        # Vérifier le volume
         level = rms(indata)
+
+        # Send RMS to dashboard every ~5 blocks
+        rms_counter += 1
+        if rms_counter % 5 == 0:
+            socketio.emit("rms", {"level": float(level)})
+
         if level > threshold:
             log.info("BOOM détecté! RMS=%.4f (seuil=%.4f)", level, threshold)
-            boom_detected = True
-            post_recording = np.zeros((post_samples, channels), dtype=np.float32)
-            post_recorded = 0
+            socketio.emit("status", {"state": "boom"})
+            s["boom_detected"] = True
+            s["post_recording"] = np.zeros((post_samples, channels), dtype=np.float32)
+            s["post_recorded"] = 0
+
+    log.info("StopBoom démarré")
+    log.info("  device=[%s] %s", device, dev_info["name"])
+    log.info("  alsa_device=%s  sr=%d  out_sr=%d  channels=%d",
+             alsa_device, sr, out_sr, channels)
 
     try:
         with sd.InputStream(
@@ -211,19 +284,48 @@ def main():
                 except queue.Empty:
                     continue
 
-                # Flatten si mono
                 if boom_audio.ndim == 2 and boom_audio.shape[1] == 1:
                     boom_audio = boom_audio.flatten()
 
-                log.info("Lecture du boom (%.2fs)...", len(boom_audio) / sr)
+                duration = len(boom_audio) / sr
+                boom_rms = float(rms(boom_audio))
+
+                log.info("Lecture du boom (%.2fs)...", duration)
+                socketio.emit("status", {"state": "boom"})
                 play_audio(boom_audio, sr, alsa_device, out_sr)
                 log.info("Lecture terminée")
 
+                # Log detection
+                now = datetime.now()
+                detection = {
+                    "date": str(now.date()),
+                    "time": now.strftime("%H:%M:%S"),
+                    "rms": boom_rms,
+                    "duration": duration,
+                }
+                state["history"].append(detection)
+                save_history(state["history"])
+
+                if state["today_date"] != str(now.date()):
+                    state["today_date"] = str(now.date())
+                    state["today_count"] = 0
+                state["today_count"] += 1
+
+                socketio.emit("boom", {
+                    "time": detection["time"],
+                    "rms": boom_rms,
+                    "duration": duration,
+                    "today_count": state["today_count"],
+                })
+
+                _, _, _, cooldown = get_cfg_values()
                 if cooldown > 0:
                     log.info("Cooldown %ds...", cooldown)
+                    socketio.emit("status", {"state": "cooldown"})
                     time.sleep(cooldown)
 
-                paused = False
+                cb_state["paused"] = False
+                socketio.emit("status", {"state": "listening"})
                 log.info("Écoute reprise")
 
     except KeyboardInterrupt:
@@ -231,6 +333,30 @@ def main():
     except Exception as e:
         log.error("Erreur: %s", e)
         raise
+
+
+def main():
+    if "--list-devices" in sys.argv:
+        list_devices()
+        return
+
+    cfg = load_config()
+    state["config"] = cfg
+    state["history"] = load_history()
+
+    # Count today's booms
+    today = str(date.today())
+    state["today_date"] = today
+    state["today_count"] = len([h for h in state["history"] if h.get("date") == today])
+
+    # Start audio detection in background thread
+    audio_thread = threading.Thread(target=audio_loop, daemon=True)
+    audio_thread.start()
+
+    # Start web server
+    port = cfg.get("web_port", 5000)
+    log.info("Dashboard web sur http://0.0.0.0:%d", port)
+    socketio.run(app, host="0.0.0.0", port=port, allow_unsafe_werkzeug=True)
 
 
 if __name__ == "__main__":

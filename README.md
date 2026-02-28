@@ -54,6 +54,8 @@ source venv/bin/activate
 python3 stopboom.py
 ```
 
+Le dashboard web est accessible sur `http://<hostname>.local:5000`.
+
 ### Service systemd (demarrage automatique)
 
 ```bash
@@ -68,7 +70,7 @@ Le service demarre automatiquement au boot du Pi.
 
 ## Configuration
 
-Editer `config.json` puis redemarrer le service :
+Editer `config.json` via le dashboard web ou manuellement, puis redemarrer le service :
 
 ```json
 {
@@ -95,6 +97,7 @@ Editer `config.json` puis redemarrer le service :
 | `device` | Index du device sounddevice pour la capture. `null` = auto-detection du premier device USB. |
 | `alsa_device` | Device ALSA pour la lecture (ex: `plughw:1,0`). |
 | `output_sample_rate` | Frequence de sortie pour la lecture (48000 recommande). |
+| `web_port` | Port du dashboard web (5000 par defaut). |
 
 ### Trouver les devices audio
 
