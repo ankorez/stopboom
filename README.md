@@ -4,22 +4,18 @@ Detecte les booms des voisins via un speakerphone Jabra USB et les rejoue automa
 
 ## Materiel requis
 
-- Raspberry Pi 3 (ou superieur)
-- Carte SD avec Raspbian Lite (sans interface graphique)
-- Speakerphone Jabra USB (teste avec Jabra SPEAK 410)
+- Raspberry Pi (Zero W/2W, 3, 4, 5) ou tout autre appareil Linux
+- Speakerphone USB ou micro + enceinte (teste avec Jabra SPEAK 410)
 
 ## Installation
 
-### 1. Preparer le Raspberry Pi
+### 1. Preparer l'appareil
 
-Installer **Raspberry Pi OS Lite (64-bit)** avec [Raspberry Pi Imager](https://www.raspberrypi.com/software/).
+Installer un OS Linux (ex: Raspberry Pi OS Lite avec [Raspberry Pi Imager](https://www.raspberrypi.com/software/)).
 
-Dans les reglages avances de l'Imager :
-- Activer SSH
-- Configurer le Wi-Fi
-- Definir un utilisateur/mot de passe
+Pour un Raspberry Pi, activer SSH et configurer le Wi-Fi dans les reglages avances de l'Imager.
 
-### 2. Copier les fichiers sur le Pi
+### 2. Copier les fichiers
 
 Depuis la machine de developpement :
 
