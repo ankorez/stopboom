@@ -15,19 +15,11 @@ Installer un OS Linux (ex: Raspberry Pi OS Lite avec [Raspberry Pi Imager](https
 
 Pour un Raspberry Pi, activer SSH et configurer le Wi-Fi dans les reglages avances de l'Imager.
 
-### 2. Copier les fichiers
-
-Depuis la machine de developpement :
-
-```bash
-ssh <user>@<hostname> "mkdir -p ~/stopboom"
-scp stopboom.py config.json requirements.txt setup.sh stopboom.service <user>@<hostname>:~/stopboom/
-```
-
-### 3. Lancer l'installation
+### 2. Cloner le projet
 
 ```bash
 ssh <user>@<hostname>
+git clone https://github.com/ankorez/stopboom.git ~/stopboom
 cd ~/stopboom
 chmod +x setup.sh
 ./setup.sh
@@ -35,7 +27,7 @@ chmod +x setup.sh
 
 Cela installe les dependances systeme, cree un environnement virtuel Python, et configure le service systemd.
 
-### 4. Monter le volume du peripherique
+### 3. Monter le volume du peripherique
 
 ```bash
 # Mettre le volume ALSA au max
@@ -54,7 +46,7 @@ source venv/bin/activate
 python3 stopboom.py
 ```
 
-Le dashboard web est accessible sur `http://<hostname>.local:5000`.
+Le dashboard web est accessible sur `http://<hostname>.local:5000`. Il permet de voir le niveau audio en temps reel, l'historique des detections, modifier les parametres et activer/desactiver la detection.
 
 ### Service systemd (demarrage automatique)
 
@@ -70,7 +62,7 @@ Le service demarre automatiquement au boot du Pi.
 
 ## Configuration
 
-Editer `config.json` via le dashboard web ou manuellement, puis redemarrer le service :
+Editer `config.json` via le dashboard web (applique en temps reel) ou manuellement (necessite un redemarrage du service) :
 
 ```json
 {
