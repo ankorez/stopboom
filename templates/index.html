@@ -224,7 +224,7 @@
                     <div class="status-dot" id="statusDot"></div>
                     <span id="statusText">En ecoute...</span>
                 </div>
-                <button class="toggle-btn on" id="toggleBtn" onclick="toggleEnabled()">Actif</button>
+                <button class="toggle-btn on" id="toggleBtn" onclick="toggleEnabled()">Desactiver</button>
                 <div style="text-align: center;">
                     <div class="boom-count" id="boomCount">0</div>
                     <div class="boom-count-label">booms aujourd'hui</div>
@@ -326,10 +326,10 @@
             const btn = document.getElementById('toggleBtn');
             if (data.enabled) {
                 btn.className = 'toggle-btn on';
-                btn.textContent = 'Actif';
+                btn.textContent = 'Desactiver';
             } else {
                 btn.className = 'toggle-btn off';
-                btn.textContent = 'Desactive';
+                btn.textContent = 'Activer';
             }
         });
 
