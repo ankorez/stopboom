@@ -2,6 +2,8 @@
 """StopBoom - Détecte les booms des voisins et les rejoue."""
 
 import json
+import os
+import sys
 import time
 import wave
 import queue
@@ -28,11 +30,42 @@ def rms(block):
     return np.sqrt(np.mean(block ** 2))
 
 
-def play_audio(audio, sr, alsa_device):
-    """Joue l'audio via aplay en stéréo 48kHz."""
-    out_sr = 48000
+def list_devices():
+    """Affiche les devices audio disponibles."""
+    print("\n=== Devices audio disponibles ===\n")
+    devices = sd.query_devices()
+    for i, d in enumerate(devices):
+        inp = d["max_input_channels"]
+        out = d["max_output_channels"]
+        sr = int(d["default_samplerate"])
+        flags = []
+        if inp > 0:
+            flags.append(f"{inp} in")
+        if out > 0:
+            flags.append(f"{out} out")
+        print(f"  [{i}] {d['name']}  ({', '.join(flags)})  {sr} Hz")
+    print()
+    print("Pour config.json :")
+    print('  "device" : index du device avec des canaux input (micro)')
+    print('  "alsa_device" : "plughw:<card>,0" pour la sortie')
+    print()
+    print("Astuce : lancer 'arecord -l' et 'aplay -l' pour voir les cartes ALSA")
+    print()
 
-    # Resample 16kHz -> 48kHz par interpolation
+
+def detect_device():
+    """Auto-détecte le premier device USB avec entrée et sortie."""
+    devices = sd.query_devices()
+    for i, d in enumerate(devices):
+        name = d["name"].lower()
+        if "usb" in name and d["max_input_channels"] > 0:
+            return i, d
+    return None, None
+
+
+def play_audio(audio, sr, alsa_device, out_sr):
+    """Joue l'audio via aplay en stéréo."""
+    # Resample si nécessaire
     if sr != out_sr:
         n_samples = int(len(audio) * out_sr / sr)
         indices = np.linspace(0, len(audio) - 1, n_samples)
@@ -57,13 +90,15 @@ def play_audio(audio, sr, alsa_device):
     subprocess.run(["aplay", "-D", alsa_device, tmp_path],
                    capture_output=True)
 
-    import os
     os.unlink(tmp_path)
 
 
 def main():
+    if "--list-devices" in sys.argv:
+        list_devices()
+        return
+
     cfg = load_config()
-    sr = cfg["sample_rate"]
     channels = cfg["channels"]
     threshold = cfg["threshold"]
     pre_seconds = cfg["pre_boom_seconds"]
@@ -71,6 +106,24 @@ def main():
     cooldown = cfg["cooldown_seconds"]
     device = cfg["device"]
     alsa_device = cfg.get("alsa_device", "plughw:1,0")
+    out_sr = cfg.get("output_sample_rate", 48000)
+
+    # Auto-détection du device si null
+    if device is None:
+        idx, dev_info = detect_device()
+        if idx is not None:
+            device = idx
+            log.info("Device auto-détecté: [%d] %s", idx, dev_info["name"])
+        else:
+            log.error("Aucun device USB détecté. Lancer avec --list-devices pour voir les devices disponibles.")
+            sys.exit(1)
+
+    # Récupérer le sample rate du device
+    dev_info = sd.query_devices(device)
+    sr = cfg.get("sample_rate")
+    if sr is None or sr == 0:
+        sr = int(dev_info["default_samplerate"])
+        log.info("Sample rate auto-détecté: %d Hz", sr)
 
     block_size = 1024
     pre_samples = int(sr * pre_seconds)
@@ -84,8 +137,9 @@ def main():
     log.info("StopBoom démarré")
     log.info("  threshold=%.2f  pre=%.1fs  post=%.1fs  cooldown=%ds",
              threshold, pre_seconds, post_seconds, cooldown)
-    log.info("  device=%s  alsa_device=%s  sr=%d  channels=%d",
-             device, alsa_device, sr, channels)
+    log.info("  device=[%s] %s", device, dev_info["name"])
+    log.info("  alsa_device=%s  sr=%d  out_sr=%d  channels=%d",
+             alsa_device, sr, out_sr, channels)
 
     boom_detected = False
     post_recording = None
@@ -162,7 +216,7 @@ def main():
                     boom_audio = boom_audio.flatten()
 
                 log.info("Lecture du boom (%.2fs)...", len(boom_audio) / sr)
-                play_audio(boom_audio, sr, alsa_device)
+                play_audio(boom_audio, sr, alsa_device, out_sr)
                 log.info("Lecture terminée")
 
                 if cooldown > 0:

@@ -76,10 +76,11 @@ Editer `config.json` puis redemarrer le service :
   "pre_boom_seconds": 1.0,
   "post_boom_seconds": 1.5,
   "cooldown_seconds": 5,
-  "sample_rate": 16000,
+  "sample_rate": null,
   "channels": 1,
-  "device": 1,
-  "alsa_device": "plughw:1,0"
+  "device": null,
+  "alsa_device": "plughw:1,0",
+  "output_sample_rate": 48000
 }
 ```
 
@@ -89,47 +90,38 @@ Editer `config.json` puis redemarrer le service :
 | `pre_boom_seconds` | Secondes d'audio conservees avant le boom. |
 | `post_boom_seconds` | Secondes d'audio enregistrees apres la detection. |
 | `cooldown_seconds` | Pause apres chaque replay pour eviter les boucles. |
-| `sample_rate` | Frequence d'echantillonnage (16000 pour le Jabra). |
+| `sample_rate` | Frequence d'echantillonnage. `null` = auto-detection depuis le device. |
 | `channels` | Canaux d'entree (1 = mono). |
-| `device` | Index du device sounddevice pour la capture. |
-| `alsa_device` | Device ALSA pour la lecture (`plughw:1,0` pour le Jabra). |
+| `device` | Index du device sounddevice pour la capture. `null` = auto-detection du premier device USB. |
+| `alsa_device` | Device ALSA pour la lecture (ex: `plughw:1,0`). |
+| `output_sample_rate` | Frequence de sortie pour la lecture (48000 recommande). |
+
+### Trouver les devices audio
+
+```bash
+python3 stopboom.py --list-devices
+```
+
+Cela affiche tous les peripheriques disponibles avec leur index, nombre de canaux et sample rate.
 
 ### Calibrer le seuil
 
-```bash
-cd ~/stopboom
-source venv/bin/activate
-python3 -c "
-import sounddevice as sd
-import numpy as np
-
-def callback(indata, frames, time, status):
-    level = np.sqrt(np.mean(indata**2))
-    bars = int(level * 200)
-    print(f'RMS: {level:.4f} |{\"#\" * bars}')
-
-with sd.InputStream(samplerate=16000, channels=1, device=1, callback=callback, blocksize=1024):
-    import time
-    while True:
-        time.sleep(0.1)
-"
-```
-
-Faire du bruit et noter les valeurs RMS pour ajuster `threshold`.
+Lancer StopBoom et faire du bruit. Les logs affichent la valeur RMS a chaque detection.
+Ajuster `threshold` dans `config.json` selon les valeurs observees.
 
 ## Depannage
 
-### Trouver le bon device
-
-```bash
-python3 -c "import sounddevice; print(sounddevice.query_devices())"
-```
-
-Reperer l'index du Jabra et mettre a jour `device` dans `config.json`.
-
 ### Pas de son en sortie
 
-1. Verifier que le Jabra n'est pas en mute (voyant rouge)
-2. Monter le volume : `amixer -c 1 cset numid=3 11`
-3. Appuyer sur le bouton volume + du Jabra
-4. Tester avec : `speaker-test -D plughw:1,0 -c 2 -t sine -f 440`
+1. Verifier que le peripherique n'est pas en mute
+2. Monter le volume ALSA : `amixer -c <card> contents` pour voir les controles, puis `amixer -c <card> cset numid=<id> <max>`
+3. Tester avec : `speaker-test -D plughw:<card>,0 -c 2 -t sine -f 440`
+
+### Trouver le bon device ALSA
+
+```bash
+arecord -l   # Peripheriques de capture
+aplay -l     # Peripheriques de lecture
+```
+
+Le numero de carte correspond au `<card>` dans `plughw:<card>,0`.
