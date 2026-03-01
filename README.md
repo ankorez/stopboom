@@ -19,6 +19,8 @@ For a Raspberry Pi, enable SSH and configure Wi-Fi in the Imager advanced settin
 
 ```bash
 ssh <user>@<hostname>
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y git
 git clone https://github.com/ankorez/noisyneighbors.git ~/noisyneighbors
 cd ~/noisyneighbors
 chmod +x setup.sh
@@ -76,7 +78,7 @@ Edit `config.json` via the web dashboard (applied in real-time) or manually (req
   "sample_rate": null,
   "channels": 1,
   "device": null,
-  "alsa_device": "plughw:1,0",
+  "alsa_device": null,
   "output_sample_rate": 48000,
   "replay_mode": "echo"
 }
@@ -91,7 +93,7 @@ Edit `config.json` via the web dashboard (applied in real-time) or manually (req
 | `sample_rate` | Sample rate. `null` = auto-detect from device. |
 | `channels` | Input channels (1 = mono). |
 | `device` | sounddevice device index for capture. `null` = auto-detect first USB device. |
-| `alsa_device` | ALSA device for playback (e.g. `plughw:1,0`). |
+| `alsa_device` | ALSA device for playback. `null` = auto-detect USB device. |
 | `output_sample_rate` | Output sample rate for playback (48000 recommended). |
 | `replay_mode` | Sound played after detection: `echo` (replay the boom), `alarm`, `doorbell`, `hammer`, `honk`, `siren`. |
 | `web_port` | Web dashboard port (default 5000). |

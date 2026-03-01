@@ -100,6 +100,38 @@ def detect_device():
     return None, None
 
 
+def list_alsa_playback():
+    """List ALSA playback devices by parsing aplay -l."""
+    try:
+        result = subprocess.run(
+            ["aplay", "-l"], capture_output=True, text=True
+        )
+        devices = []
+        for line in result.stdout.split("\n"):
+            if line.startswith("card "):
+                # "card 2: USB [Jabra SPEAK 410 USB], device 0: ..."
+                parts = line.split(":")
+                card = parts[0].split()[1]
+                name = parts[1].split("[")[1].split("]")[0] if "[" in parts[1] else parts[1].strip()
+                dev = parts[2].strip().split()[0] if len(parts) > 2 else "0"
+                alsa_id = f"plughw:{card},{dev}"
+                devices.append({"id": alsa_id, "name": name})
+        return devices
+    except Exception:
+        return []
+
+
+def detect_alsa_device():
+    """Auto-detect ALSA playback device (prefer USB)."""
+    devices = list_alsa_playback()
+    for d in devices:
+        if "usb" in d["name"].lower():
+            return d["id"]
+    if devices:
+        return devices[0]["id"]
+    return "plughw:0,0"
+
+
 def play_audio(audio, sr, alsa_device, out_sr):
     if sr != out_sr:
         n_samples = int(len(audio) * out_sr / sr)
@@ -197,6 +229,13 @@ def on_connect():
         "mode": state["config"].get("replay_mode", "echo"),
         "available": AVAILABLE_SOUNDS,
     })
+    # Send device info and ALSA devices
+    if "device_info" in state:
+        socketio.emit("device_info", state["device_info"])
+    socketio.emit("alsa_devices", {
+        "devices": list_alsa_playback(),
+        "current": state["config"].get("alsa_device", ""),
+    })
     # Send current volume
     level, max_vol = get_volume()
     socketio.emit("volume", {"level": level, "max": max_vol})
@@ -254,6 +293,22 @@ def on_set_replay_mode(data):
         log.info("Replay mode set to '%s' from dashboard", mode)
 
 
+@socketio.on("set_alsa_device")
+def on_set_alsa_device(data):
+    device = data["device"]
+    state["config"]["alsa_device"] = device
+    save_config(state["config"])
+    # Update device_info display
+    if "device_info" in state:
+        state["device_info"]["output"] = device
+        socketio.emit("device_info", state["device_info"])
+    socketio.emit("alsa_devices", {
+        "devices": list_alsa_playback(),
+        "current": device,
+    })
+    log.info("ALSA output device set to '%s' from dashboard", device)
+
+
 @socketio.on("toggle_enabled")
 def on_toggle_enabled():
     state["enabled"] = not state["enabled"]
@@ -273,8 +328,14 @@ def audio_loop():
     cfg = state["config"]
     channels = cfg["channels"]
     device = cfg["device"]
-    alsa_device = cfg.get("alsa_device", "plughw:1,0")
+    alsa_device = cfg.get("alsa_device") or None
     out_sr = cfg.get("output_sample_rate", 48000)
+
+    if alsa_device is None:
+        alsa_device = detect_alsa_device()
+        cfg["alsa_device"] = alsa_device
+        save_config(cfg)
+        log.info("Auto-detected ALSA output: %s", alsa_device)
 
     if device is None:
         idx, dev_info = detect_device()
@@ -376,6 +437,12 @@ def audio_loop():
         except Exception as e:
             log.error("Error in audio callback: %s", e)
 
+    state["device_info"] = {
+        "input": dev_info["name"],
+        "output": alsa_device,
+    }
+    socketio.emit("device_info", state["device_info"])
+
     log.info("NoisyNeighbors started")
     log.info("  device=[%s] %s", device, dev_info["name"])
     log.info("  alsa_device=%s  sr=%d  out_sr=%d  channels=%d",
@@ -403,13 +470,14 @@ def audio_loop():
                 duration = len(boom_audio) / sr
                 boom_rms = float(rms(boom_audio))
 
+                cur_alsa = state["config"].get("alsa_device") or alsa_device
                 replay_mode = state["config"].get("replay_mode", "echo")
                 log.info("Playing boom (%.2fs, mode=%s)...", duration, replay_mode)
                 socketio.emit("status", {"state": "boom"})
                 if replay_mode == "echo":
-                    play_audio(boom_audio, sr, alsa_device, out_sr)
+                    play_audio(boom_audio, sr, cur_alsa, out_sr)
                 else:
-                    play_sound_file(replay_mode, alsa_device)
+                    play_sound_file(replay_mode, cur_alsa)
                 log.info("Playback finished")
 
                 # Log detection

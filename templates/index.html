@@ -256,6 +256,11 @@
                     <div class="boom-count-label">booms today</div>
                 </div>
             </div>
+            <div id="deviceInfo" style="margin-top: 12px; font-size: 13px; color: #666; display: none;">
+                <span>Input: <span id="inputDevice" style="color: #888;">-</span></span>
+                &nbsp;&middot;&nbsp;
+                <span>Output: <span id="outputDevice" style="color: #888;">-</span></span>
+            </div>
         </div>
 
         <div class="card">
@@ -277,7 +282,10 @@
         </div>
 
         <div class="card">
-            <h2>Output Volume</h2>
+            <h2>Output</h2>
+            <select class="sound-select" id="alsaDevice" onchange="setAlsaDevice(this.value)" style="margin-bottom: 12px;">
+                <option value="">Detecting...</option>
+            </select>
             <div class="volume-row">
                 <input type="range" class="volume-slider" id="volumeSlider" min="0" max="11" step="1" value="11">
                 <span class="volume-value" id="volumeValue">11</span>
@@ -381,6 +389,13 @@
             document.getElementById('postBoomValue').textContent = parseFloat(this.value).toFixed(1) + 's';
         });
         postBoomSlider.addEventListener('change', function() { saveSettings(); });
+
+        // Device info
+        socket.on('device_info', function(data) {
+            document.getElementById('inputDevice').textContent = data.input;
+            document.getElementById('outputDevice').textContent = data.output;
+            document.getElementById('deviceInfo').style.display = 'block';
+        });
 
         // RMS level
         socket.on('rms', function(data) {
@@ -509,6 +524,23 @@
             threshold = 0.15;
             updateThresholdLine();
             saveSettings();
+        }
+
+        // ALSA device selector
+        socket.on('alsa_devices', function(data) {
+            var sel = document.getElementById('alsaDevice');
+            sel.innerHTML = '';
+            data.devices.forEach(function(d) {
+                var opt = document.createElement('option');
+                opt.value = d.id;
+                opt.textContent = d.name + ' (' + d.id + ')';
+                if (d.id === data.current) opt.selected = true;
+                sel.appendChild(opt);
+            });
+        });
+
+        function setAlsaDevice(device) {
+            socket.emit('set_alsa_device', { device: device });
         }
 
         // Volume slider
