@@ -102,18 +102,17 @@ def detect_device():
 
 def list_alsa_playback():
     """List ALSA playback devices by parsing aplay -l."""
+    import re
     try:
         result = subprocess.run(
             ["aplay", "-l"], capture_output=True, text=True
         )
         devices = []
         for line in result.stdout.split("\n"):
-            if line.startswith("card "):
-                # "card 2: USB [Jabra SPEAK 410 USB], device 0: ..."
-                parts = line.split(":")
-                card = parts[0].split()[1]
-                name = parts[1].split("[")[1].split("]")[0] if "[" in parts[1] else parts[1].strip()
-                dev = parts[2].strip().split()[0] if len(parts) > 2 else "0"
+            # "card 2: USB [Jabra SPEAK 410 USB], device 0: USB Audio [USB Audio]"
+            m = re.match(r"card (\d+):.*\[(.+?)\], device (\d+):", line)
+            if m:
+                card, name, dev = m.group(1), m.group(2), m.group(3)
                 alsa_id = f"plughw:{card},{dev}"
                 devices.append({"id": alsa_id, "name": name})
         return devices
