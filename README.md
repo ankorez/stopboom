@@ -6,6 +6,7 @@ Detects neighbor booms and automatically plays them back. Includes a real-time w
 
 - Raspberry Pi (Zero W/2W, 3, 4, 5) or any Linux device
 - USB speakerphone or mic + speaker (tested with Jabra SPEAK 410)
+- (Optional) PS4 DualShock 4 controller via USB for vibration feedback
 
 ## Installation
 
@@ -80,7 +81,9 @@ Edit `config.json` via the web dashboard (applied in real-time) or manually (req
   "device": null,
   "alsa_device": null,
   "output_sample_rate": 48000,
-  "replay_mode": "echo"
+  "replay_mode": "echo",
+  "ps4_vibration": false,
+  "vibration_intensity": 100
 }
 ```
 
@@ -96,6 +99,8 @@ Edit `config.json` via the web dashboard (applied in real-time) or manually (req
 | `alsa_device` | ALSA device for playback. `null` = auto-detect USB device. |
 | `output_sample_rate` | Output sample rate for playback (48000 recommended). |
 | `replay_mode` | Sound played after detection: `echo` (replay the boom), `alarm`, `doorbell`, `hammer`, `honk`, `siren`. |
+| `ps4_vibration` | Enable PS4 controller vibration on boom detection (triggers alongside the sound). |
+| `vibration_intensity` | Vibration intensity (10-100%). |
 | `web_port` | Web dashboard port (default 5000). |
 
 ### Finding audio devices
@@ -109,6 +114,12 @@ This lists all available devices with their index, channel count, and sample rat
 ### Calibrating the threshold
 
 Start NoisyNeighbors and make some noise. The logs show the RMS value for each detection. Adjust `threshold` in `config.json` based on the observed values.
+
+### PS4 controller (optional)
+
+Connect a DualShock 4 controller via USB. The dashboard shows its connection status and lets you enable vibration on boom detection. Vibration triggers alongside the response sound.
+
+The setup script automatically adds the user to the `input` group (required for controller access). A reboot may be needed after the first install.
 
 ## Troubleshooting
 
