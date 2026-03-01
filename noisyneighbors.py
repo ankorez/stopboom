@@ -170,7 +170,7 @@ def play_audio(audio, sr, alsa_device, out_sr):
 
 SOUNDS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sounds")
 
-AVAILABLE_SOUNDS = ["echo", "alarm", "doorbell", "hammer", "honk", "siren"]
+AVAILABLE_SOUNDS = ["echo", "alarm", "doorbell", "hammer", "honk", "siren", "vibration"]
 
 
 def play_sound_file(name, alsa_device):
@@ -180,6 +180,58 @@ def play_sound_file(name, alsa_device):
         log.error("Sound not found: %s", path)
         return
     subprocess.run(["aplay", "-D", alsa_device, path], capture_output=True)
+
+
+def find_ps4_controller():
+    """Find a PS4 DualShock 4 controller connected via USB."""
+    try:
+        import evdev
+        for path in evdev.list_devices():
+            dev = evdev.InputDevice(path)
+            name = dev.name.lower()
+            if any(k in name for k in ["wireless controller", "dualshock", "sony"]):
+                caps = dev.capabilities()
+                if evdev.ecodes.EV_FF in caps:
+                    return dev
+            dev.close()
+    except Exception as e:
+        log.error("Error scanning for PS4 controller: %s", e)
+    return None
+
+
+def vibrate_ps4(duration=2.0):
+    """Trigger vibration on PS4 controller for given duration."""
+    import evdev
+    from evdev import ecodes, ff
+
+    dev = find_ps4_controller()
+    if dev is None:
+        log.error("No PS4 controller found")
+        return
+
+    try:
+        rumble = ff.Rumble(strong_magnitude=0xFFFF, weak_magnitude=0xFFFF)
+        effect = ff.Effect(
+            ecodes.FF_RUMBLE,
+            -1,  # id (auto-assign)
+            0,   # direction
+            ff.Trigger(0, 0),
+            ff.Replay(int(duration * 1000), 0),
+            ff.EffectType(ff_rumble_effect=rumble),
+        )
+        effect_id = dev.upload_effect(effect)
+        dev.write(ecodes.EV_FF, effect_id, 1)
+        time.sleep(duration)
+        dev.write(ecodes.EV_FF, effect_id, 0)
+        dev.erase_effect(effect_id)
+        dev.close()
+        log.info("PS4 vibration completed (%.1fs)", duration)
+    except Exception as e:
+        log.error("PS4 vibration failed: %s", e)
+        try:
+            dev.close()
+        except Exception:
+            pass
 
 
 def get_alsa_card():
@@ -498,7 +550,9 @@ def audio_loop():
                 replay_mode = state["config"].get("replay_mode", "echo")
                 log.info("Playing boom (%.2fs, mode=%s)...", duration, replay_mode)
                 socketio.emit("status", {"state": "boom"})
-                if replay_mode == "echo":
+                if replay_mode == "vibration":
+                    vibrate_ps4(duration=duration)
+                elif replay_mode == "echo":
                     play_audio(boom_audio, sr, cur_alsa, out_sr)
                 else:
                     play_sound_file(replay_mode, cur_alsa)

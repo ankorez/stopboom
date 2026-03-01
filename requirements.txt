@@ -2,3 +2,4 @@ sounddevice
 numpy
 flask
 flask-socketio
+evdev
