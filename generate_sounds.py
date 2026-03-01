@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Génère les sons prédéfinis pour StopBoom."""
+"""Generate predefined sounds for NoisyNeighbors."""
 
 import os
 import wave

@@ -1,32 +1,32 @@
 #!/bin/bash
-# Setup StopBoom sur Raspberry Pi
+# Setup NoisyNeighbors on Raspberry Pi
 
 set -e
 
-echo "=== Installation des dépendances système ==="
+echo "=== Installing system dependencies ==="
 sudo apt update
 sudo apt install -y python3-pip python3-venv portaudio19-dev
 
-echo "=== Création de l'environnement virtuel ==="
+echo "=== Creating virtual environment ==="
 python3 -m venv venv
 source venv/bin/activate
 
-echo "=== Installation des dépendances Python ==="
+echo "=== Installing Python dependencies ==="
 pip install -r requirements.txt
 
-echo "=== Installation du service systemd ==="
-sudo cp stopboom.service /etc/systemd/system/
+echo "=== Installing systemd service ==="
+sudo cp noisyneighbors.service /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl enable stopboom
+sudo systemctl enable noisyneighbors
 
 echo ""
-echo "=== Installation terminée ==="
-echo "Commandes utiles :"
-echo "  sudo systemctl start stopboom    # Démarrer"
-echo "  sudo systemctl stop stopboom     # Arrêter"
-echo "  sudo systemctl status stopboom   # Statut"
-echo "  journalctl -u stopboom -f        # Voir les logs"
+echo "=== Installation complete ==="
+echo "Useful commands:"
+echo "  sudo systemctl start noisyneighbors    # Start"
+echo "  sudo systemctl stop noisyneighbors     # Stop"
+echo "  sudo systemctl status noisyneighbors   # Status"
+echo "  journalctl -u noisyneighbors -f        # View logs"
 echo ""
-echo "Pour tester manuellement :"
+echo "To test manually:"
 echo "  source venv/bin/activate"
-echo "  python3 stopboom.py"
+echo "  python3 noisyneighbors.py"

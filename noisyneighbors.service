@@ -1,0 +1,14 @@
+[Unit]
+Description=NoisyNeighbors - Noise detection and replay
+After=sound.target
+
+[Service]
+Type=simple
+User=ankorez
+WorkingDirectory=/home/ankorez/noisyneighbors
+ExecStart=/home/ankorez/noisyneighbors/venv/bin/python3 /home/ankorez/noisyneighbors/noisyneighbors.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

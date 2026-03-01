@@ -1,71 +1,71 @@
-# StopBoom
+# NoisyNeighbors
 
-Detecte les booms des voisins et les rejoue automatiquement. Inclut un dashboard web pour le monitoring et la configuration en temps reel.
+Detects neighbor booms and automatically plays them back. Includes a real-time web dashboard for monitoring and configuration.
 
-## Materiel requis
+## Hardware
 
-- Raspberry Pi (Zero W/2W, 3, 4, 5) ou tout autre appareil Linux
-- Speakerphone USB ou micro + enceinte (teste avec Jabra SPEAK 410)
+- Raspberry Pi (Zero W/2W, 3, 4, 5) or any Linux device
+- USB speakerphone or mic + speaker (tested with Jabra SPEAK 410)
 
 ## Installation
 
-### 1. Preparer l'appareil
+### 1. Prepare the device
 
-Installer un OS Linux (ex: Raspberry Pi OS Lite avec [Raspberry Pi Imager](https://www.raspberrypi.com/software/)).
+Install a Linux OS (e.g. Raspberry Pi OS Lite with [Raspberry Pi Imager](https://www.raspberrypi.com/software/)).
 
-Pour un Raspberry Pi, activer SSH et configurer le Wi-Fi dans les reglages avances de l'Imager.
+For a Raspberry Pi, enable SSH and configure Wi-Fi in the Imager advanced settings.
 
-### 2. Cloner le projet
+### 2. Clone and install
 
 ```bash
 ssh <user>@<hostname>
-git clone https://github.com/ankorez/stopboom.git ~/stopboom
-cd ~/stopboom
+git clone https://github.com/ankorez/noisyneighbors.git ~/noisyneighbors
+cd ~/noisyneighbors
 chmod +x setup.sh
 ./setup.sh
 ```
 
-Cela installe les dependances systeme, cree un environnement virtuel Python, et configure le service systemd.
+This installs system dependencies, creates a Python virtual environment, and sets up the systemd service.
 
-### 3. Monter le volume du peripherique
+### 3. Set output volume
 
 ```bash
-# Lister les controles de volume de la carte audio (remplacer 1 par le numero de carte)
+# List volume controls for the audio card (replace 1 with your card number)
 amixer -c 1 contents
 
-# Mettre le volume au max (adapter numid et valeur selon la sortie ci-dessus)
+# Set volume to max (adjust numid and value based on the output above)
 amixer -c 1 cset numid=<id> <max>
 ```
 
-Le volume est aussi reglable depuis le dashboard web.
+Volume can also be adjusted from the web dashboard.
 
-## Utilisation
+## Usage
 
-### Test manuel
+### Manual test
 
 ```bash
-cd ~/stopboom
+cd ~/noisyneighbors
 source venv/bin/activate
-python3 stopboom.py
+python3 noisyneighbors.py
 ```
 
-Le dashboard web est accessible sur `http://<hostname>.local:5000`. Il permet de voir le niveau audio en temps reel, l'historique des detections, modifier les parametres et activer/desactiver la detection.
+The web dashboard is available at `http://<hostname>.local:5000`. It shows real-time audio level, detection history, and lets you adjust settings and enable/disable detection.
 
-### Service systemd (demarrage automatique)
+### systemd service (auto-start)
 
 ```bash
-sudo systemctl start stopboom      # Demarrer
-sudo systemctl stop stopboom       # Arreter
-sudo systemctl status stopboom     # Statut
-sudo systemctl restart stopboom    # Redemarrer (apres modif config)
-journalctl -u stopboom -f          # Voir les logs en direct
+sudo systemctl start noisyneighbors      # Start
+sudo systemctl stop noisyneighbors       # Stop
+sudo systemctl status noisyneighbors     # Status
+sudo systemctl restart noisyneighbors    # Restart (after config change)
+journalctl -u noisyneighbors -f          # View live logs
 ```
 
-Le service demarre automatiquement au boot du Pi.
+The service starts automatically on boot.
 
 ## Configuration
 
-Editer `config.json` via le dashboard web (applique en temps reel) ou manuellement (necessite un redemarrage du service) :
+Edit `config.json` via the web dashboard (applied in real-time) or manually (requires a service restart):
 
 ```json
 {
@@ -82,46 +82,45 @@ Editer `config.json` via le dashboard web (applique en temps reel) ou manuelleme
 }
 ```
 
-| Parametre | Description |
+| Parameter | Description |
 |---|---|
-| `threshold` | Seuil de detection RMS (0.0-1.0). Baisser = plus sensible. |
-| `pre_boom_seconds` | Secondes d'audio conservees avant le boom. |
-| `post_boom_seconds` | Secondes d'audio enregistrees apres la detection. |
-| `cooldown_seconds` | Pause apres chaque replay pour eviter les boucles. |
-| `sample_rate` | Frequence d'echantillonnage. `null` = auto-detection depuis le device. |
-| `channels` | Canaux d'entree (1 = mono). |
-| `device` | Index du device sounddevice pour la capture. `null` = auto-detection du premier device USB. |
-| `alsa_device` | Device ALSA pour la lecture (ex: `plughw:1,0`). |
-| `output_sample_rate` | Frequence de sortie pour la lecture (48000 recommande). |
-| `replay_mode` | Son joue apres detection : `echo` (rejouer le boom), `alarm`, `doorbell`, `hammer`, `honk`, `siren`. |
-| `web_port` | Port du dashboard web (5000 par defaut). |
+| `threshold` | RMS detection threshold (0.0-1.0). Lower = more sensitive. |
+| `pre_boom_seconds` | Seconds of audio kept before the boom. |
+| `post_boom_seconds` | Seconds of audio recorded after detection. |
+| `cooldown_seconds` | Pause after each replay to avoid loops. |
+| `sample_rate` | Sample rate. `null` = auto-detect from device. |
+| `channels` | Input channels (1 = mono). |
+| `device` | sounddevice device index for capture. `null` = auto-detect first USB device. |
+| `alsa_device` | ALSA device for playback (e.g. `plughw:1,0`). |
+| `output_sample_rate` | Output sample rate for playback (48000 recommended). |
+| `replay_mode` | Sound played after detection: `echo` (replay the boom), `alarm`, `doorbell`, `hammer`, `honk`, `siren`. |
+| `web_port` | Web dashboard port (default 5000). |
 
-### Trouver les devices audio
-
-```bash
-python3 stopboom.py --list-devices
-```
-
-Cela affiche tous les peripheriques disponibles avec leur index, nombre de canaux et sample rate.
-
-### Calibrer le seuil
-
-Lancer StopBoom et faire du bruit. Les logs affichent la valeur RMS a chaque detection.
-Ajuster `threshold` dans `config.json` selon les valeurs observees.
-
-## Depannage
-
-### Pas de son en sortie
-
-1. Verifier que le peripherique n'est pas en mute
-2. Monter le volume ALSA : `amixer -c <card> contents` pour voir les controles, puis `amixer -c <card> cset numid=<id> <max>`
-3. Tester avec : `speaker-test -D plughw:<card>,0 -c 2 -t sine -f 440`
-
-### Trouver le bon device ALSA
+### Finding audio devices
 
 ```bash
-arecord -l   # Peripheriques de capture
-aplay -l     # Peripheriques de lecture
+python3 noisyneighbors.py --list-devices
 ```
 
-Le numero de carte correspond au `<card>` dans `plughw:<card>,0`.
+This lists all available devices with their index, channel count, and sample rate.
+
+### Calibrating the threshold
+
+Start NoisyNeighbors and make some noise. The logs show the RMS value for each detection. Adjust `threshold` in `config.json` based on the observed values.
+
+## Troubleshooting
+
+### No sound output
+
+1. Check that the device is not muted
+2. Set ALSA volume: `amixer -c <card> contents` to see controls, then `amixer -c <card> cset numid=<id> <max>`
+3. Test with: `speaker-test -D plughw:<card>,0 -c 2 -t sine -f 440`
+
+### Finding the right ALSA device
+
+```bash
+arecord -l   # Capture devices
+aplay -l     # Playback devices
+```
+
+The card number corresponds to `<card>` in `plughw:<card>,0`.

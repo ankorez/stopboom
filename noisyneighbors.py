@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""StopBoom - Détecte les booms des voisins et les rejoue."""
+"""NoisyNeighbors - Detects neighbor booms and plays them back."""
 
 import json
 import os
@@ -22,14 +22,14 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
 )
-log = logging.getLogger("stopboom")
+log = logging.getLogger("noisyneighbors")
 
 # Flask app
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "stopboom"
+app.config["SECRET_KEY"] = "noisyneighbors"
 socketio = SocketIO(app, async_mode="threading")
 
-# State partagé
+# Shared state
 state = {
     "status": "listening",  # listening, boom, cooldown
     "history": [],
@@ -72,7 +72,7 @@ def rms(block):
 
 
 def list_devices():
-    print("\n=== Devices audio disponibles ===\n")
+    print("\n=== Available audio devices ===\n")
     devices = sd.query_devices()
     for i, d in enumerate(devices):
         inp = d["max_input_channels"]
@@ -85,9 +85,9 @@ def list_devices():
             flags.append(f"{out} out")
         print(f"  [{i}] {d['name']}  ({', '.join(flags)})  {sr} Hz")
     print()
-    print("Pour config.json :")
-    print('  "device" : index du device avec des canaux input (micro)')
-    print('  "alsa_device" : "plughw:<card>,0" pour la sortie')
+    print("For config.json:")
+    print('  "device" : index of the device with input channels (mic)')
+    print('  "alsa_device" : "plughw:<card>,0" for output')
     print()
 
 
@@ -127,16 +127,16 @@ AVAILABLE_SOUNDS = ["echo", "alarm", "doorbell", "hammer", "honk", "siren"]
 
 
 def play_sound_file(name, alsa_device):
-    """Joue un fichier wav prédéfini."""
+    """Play a predefined wav file."""
     path = os.path.join(SOUNDS_DIR, f"{name}.wav")
     if not os.path.exists(path):
-        log.error("Son introuvable: %s", path)
+        log.error("Sound not found: %s", path)
         return
     subprocess.run(["aplay", "-D", alsa_device, path], capture_output=True)
 
 
 def get_alsa_card():
-    """Extrait le numéro de carte depuis alsa_device (ex: plughw:1,0 -> 1)."""
+    """Extract card number from alsa_device (e.g. plughw:1,0 -> 1)."""
     alsa = state["config"].get("alsa_device", "plughw:1,0")
     try:
         return alsa.split(":")[1].split(",")[0]
@@ -145,7 +145,7 @@ def get_alsa_card():
 
 
 def get_volume():
-    """Lit le volume actuel et max via amixer."""
+    """Read current and max volume via amixer."""
     card = get_alsa_card()
     try:
         result = subprocess.run(
@@ -169,7 +169,7 @@ def get_volume():
 
 
 def set_volume(level):
-    """Change le volume via amixer."""
+    """Set volume via amixer."""
     card = get_alsa_card()
     subprocess.run(
         ["amixer", "-c", card, "cset", "numid=3", str(level)],
@@ -222,7 +222,7 @@ def on_save_config(data):
         pre = float(data["pre_boom_seconds"])
         post = float(data["post_boom_seconds"])
     except (TypeError, ValueError) as e:
-        log.warning("Config invalide ignorée: %s", e)
+        log.warning("Invalid config ignored: %s", e)
         return
     cfg = state["config"]
     cfg["threshold"] = t
@@ -231,14 +231,14 @@ def on_save_config(data):
     cfg["post_boom_seconds"] = post
     save_config(cfg)
     state["config"] = cfg
-    log.info("Config mise à jour depuis le dashboard")
+    log.info("Config updated from dashboard")
 
 
 @socketio.on("set_volume")
 def on_set_volume(data):
     level = int(data["level"])
     set_volume(level)
-    log.info("Volume changé à %d depuis le dashboard", level)
+    log.info("Volume set to %d from dashboard", level)
 
 
 @socketio.on("set_replay_mode")
@@ -251,7 +251,7 @@ def on_set_replay_mode(data):
             "mode": mode,
             "available": AVAILABLE_SOUNDS,
         })
-        log.info("Mode replay changé à '%s' depuis le dashboard", mode)
+        log.info("Replay mode set to '%s' from dashboard", mode)
 
 
 @socketio.on("toggle_enabled")
@@ -264,7 +264,7 @@ def on_toggle_enabled():
     status = "listening" if enabled else "disabled"
     socketio.emit("enabled_state", {"enabled": enabled})
     socketio.emit("status", {"state": status})
-    log.info("StopBoom %s depuis le dashboard", "activé" if enabled else "désactivé")
+    log.info("NoisyNeighbors %s from dashboard", "enabled" if enabled else "disabled")
 
 
 # --- Audio detection thread ---
@@ -280,16 +280,16 @@ def audio_loop():
         idx, dev_info = detect_device()
         if idx is not None:
             device = idx
-            log.info("Device auto-détecté: [%d] %s", idx, dev_info["name"])
+            log.info("Auto-detected device: [%d] %s", idx, dev_info["name"])
         else:
-            log.error("Aucun device USB détecté.")
+            log.error("No USB device detected.")
             return
 
     dev_info = sd.query_devices(device)
     sr = cfg.get("sample_rate")
     if sr is None or sr == 0:
         sr = int(dev_info["default_samplerate"])
-        log.info("Sample rate auto-détecté: %d Hz", sr)
+        log.info("Auto-detected sample rate: %d Hz", sr)
 
     block_size = 1024
     boom_queue = queue.Queue()
@@ -305,7 +305,7 @@ def audio_loop():
     state["cb_state"] = cb_state
 
     def get_cfg_values():
-        """Read live config values (with safe fallbacks)."""
+        """Read live config values with safe fallbacks."""
         c = state["config"]
         try:
             t = float(c.get("threshold") or 0.15)
@@ -368,15 +368,15 @@ def audio_loop():
                 socketio.emit("rms", {"level": float(level)})
 
             if level > threshold:
-                log.info("BOOM détecté! RMS=%.4f (seuil=%.4f)", level, threshold)
+                log.info("BOOM detected! RMS=%.4f (threshold=%.4f)", level, threshold)
                 socketio.emit("status", {"state": "boom"})
                 s["boom_detected"] = True
                 s["post_recording"] = np.zeros((post_samples, channels), dtype=np.float32)
                 s["post_recorded"] = 0
         except Exception as e:
-            log.error("Erreur dans le callback audio: %s", e)
+            log.error("Error in audio callback: %s", e)
 
-    log.info("StopBoom démarré")
+    log.info("NoisyNeighbors started")
     log.info("  device=[%s] %s", device, dev_info["name"])
     log.info("  alsa_device=%s  sr=%d  out_sr=%d  channels=%d",
              alsa_device, sr, out_sr, channels)
@@ -390,7 +390,7 @@ def audio_loop():
             device=device,
             callback=callback,
         ):
-            log.info("En écoute... (Ctrl+C pour arrêter)")
+            log.info("Listening... (Ctrl+C to stop)")
             while True:
                 try:
                     boom_audio = boom_queue.get(timeout=0.1)
@@ -404,13 +404,13 @@ def audio_loop():
                 boom_rms = float(rms(boom_audio))
 
                 replay_mode = state["config"].get("replay_mode", "echo")
-                log.info("Lecture du boom (%.2fs, mode=%s)...", duration, replay_mode)
+                log.info("Playing boom (%.2fs, mode=%s)...", duration, replay_mode)
                 socketio.emit("status", {"state": "boom"})
                 if replay_mode == "echo":
                     play_audio(boom_audio, sr, alsa_device, out_sr)
                 else:
                     play_sound_file(replay_mode, alsa_device)
-                log.info("Lecture terminée")
+                log.info("Playback finished")
 
                 # Log detection
                 now = datetime.now()
@@ -443,12 +443,12 @@ def audio_loop():
 
                 cb_state["paused"] = False
                 socketio.emit("status", {"state": "listening"})
-                log.info("Écoute reprise")
+                log.info("Listening resumed")
 
     except KeyboardInterrupt:
-        log.info("Arrêt demandé")
+        log.info("Shutdown requested")
     except Exception as e:
-        log.error("Erreur: %s", e)
+        log.error("Error: %s", e)
         raise
 
 
@@ -472,7 +472,7 @@ def main():
 
     # Start web server
     port = cfg.get("web_port", 5000)
-    log.info("Dashboard web sur http://0.0.0.0:%d", port)
+    log.info("Web dashboard on http://0.0.0.0:%d", port)
     socketio.run(app, host="0.0.0.0", port=port, allow_unsafe_werkzeug=True)
 
 

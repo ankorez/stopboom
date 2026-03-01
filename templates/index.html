@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StopBoom</title>
+    <title>NoisyNeighbors</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -115,6 +115,41 @@
             color: #666;
         }
 
+        /* Sliders */
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+        .slider-row label {
+            font-size: 13px;
+            color: #888;
+            min-width: 80px;
+        }
+        .slider-row input[type="range"] {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: #0f3460;
+            outline: none;
+        }
+        .slider-row input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4ecca3;
+            cursor: pointer;
+        }
+        .slider-value {
+            min-width: 40px;
+            text-align: right;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
         /* Volume */
         .volume-row {
             display: flex;
@@ -160,27 +195,7 @@
         .history-rms { color: #e23e57; font-weight: bold; }
         .history-empty { color: #666; text-align: center; padding: 20px; }
 
-        /* Settings */
-        .settings-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-        .setting-item label {
-            display: block;
-            font-size: 12px;
-            color: #888;
-            margin-bottom: 4px;
-        }
-        .setting-item input, .setting-item select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #0f3460;
-            border-radius: 6px;
-            background: #1a1a2e;
-            color: #eee;
-            font-size: 16px;
-        }
+        /* Sound select */
         .sound-select {
             width: 100%;
             padding: 10px;
@@ -190,6 +205,8 @@
             color: #eee;
             font-size: 16px;
         }
+
+        /* Buttons */
         .btn {
             padding: 10px 24px;
             border: none;
@@ -198,17 +215,10 @@
             cursor: pointer;
             font-weight: bold;
         }
-        .btn-save {
-            background: #4ecca3;
-            color: #1a1a2e;
-            margin-top: 12px;
-        }
-        .btn-save:hover { background: #3db88c; }
         .btn-reset {
             background: #0f3460;
             color: #888;
             margin-top: 12px;
-            margin-left: 8px;
         }
         .btn-reset:hover { background: #1a4a8a; color: #eee; }
         .save-feedback {
@@ -221,48 +231,53 @@
         }
 
         @media (max-width: 600px) {
-            .settings-grid { grid-template-columns: 1fr; }
             .status-row { flex-direction: column; gap: 16px; text-align: center; }
+            .slider-row label { min-width: 60px; }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>StopBoom</h1>
+        <h1>NoisyNeighbors</h1>
         <div class="subtitle">Noise Detection & Replay System</div>
     </div>
 
     <div class="container">
         <div class="card">
-            <h2>Statut</h2>
+            <h2>Status</h2>
             <div class="status-row">
                 <div class="status-indicator">
                     <div class="status-dot" id="statusDot"></div>
-                    <span id="statusText">En ecoute...</span>
+                    <span id="statusText">Listening...</span>
                 </div>
-                <button class="toggle-btn on" id="toggleBtn" onclick="toggleEnabled()">Desactiver</button>
+                <button class="toggle-btn on" id="toggleBtn" onclick="toggleEnabled()">Disable</button>
                 <div style="text-align: center;">
                     <div class="boom-count" id="boomCount">0</div>
-                    <div class="boom-count-label">booms aujourd'hui</div>
+                    <div class="boom-count-label">booms today</div>
                 </div>
             </div>
         </div>
 
         <div class="card">
-            <h2>Niveau audio</h2>
+            <h2>Detection Level</h2>
             <div class="vu-container">
                 <div class="vu-bar" id="vuBar"></div>
                 <div class="vu-threshold" id="vuThreshold"></div>
             </div>
             <div class="vu-labels">
                 <span>0</span>
-                <span id="rmsValue">RMS: 0.0000</span>
+                <span id="rmsValue">0.0000</span>
                 <span>1.0</span>
+            </div>
+            <div class="slider-row">
+                <label>Threshold</label>
+                <input type="range" id="threshold" min="0.01" max="1" step="0.01" value="0.15">
+                <span class="slider-value" id="thresholdValue">0.15</span>
             </div>
         </div>
 
         <div class="card">
-            <h2>Volume de sortie</h2>
+            <h2>Output Volume</h2>
             <div class="volume-row">
                 <input type="range" class="volume-slider" id="volumeSlider" min="0" max="11" step="1" value="11">
                 <span class="volume-value" id="volumeValue">11</span>
@@ -270,42 +285,38 @@
         </div>
 
         <div class="card">
-            <h2>Son de reponse</h2>
+            <h2>Response Sound</h2>
             <select class="sound-select" id="replayMode" onchange="setReplayMode(this.value)">
-                <option value="echo">Echo (rejouer le boom)</option>
+                <option value="echo">Echo (replay the boom)</option>
             </select>
         </div>
 
         <div class="card">
-            <h2>Historique</h2>
+            <h2>History</h2>
             <div class="history-list" id="historyList">
-                <div class="history-empty">Aucune detection pour le moment</div>
+                <div class="history-empty">No detections yet</div>
             </div>
         </div>
 
         <div class="card">
-            <h2>Configuration</h2>
-            <div class="settings-grid">
-                <div class="setting-item">
-                    <label>Seuil de detection (threshold)</label>
-                    <input type="number" id="threshold" step="0.01" min="0" max="1">
-                </div>
-                <div class="setting-item">
-                    <label>Cooldown (secondes)</label>
-                    <input type="number" id="cooldown_seconds" step="1" min="0">
-                </div>
-                <div class="setting-item">
-                    <label>Pre-boom (secondes)</label>
-                    <input type="number" id="pre_boom_seconds" step="0.1" min="0">
-                </div>
-                <div class="setting-item">
-                    <label>Post-boom (secondes)</label>
-                    <input type="number" id="post_boom_seconds" step="0.1" min="0">
-                </div>
+            <h2>Settings</h2>
+            <div class="slider-row">
+                <label>Cooldown</label>
+                <input type="range" id="cooldown_seconds" min="0" max="30" step="1" value="5">
+                <span class="slider-value" id="cooldownValue">5s</span>
             </div>
-            <button class="btn btn-save" onclick="saveSettings()">Sauvegarder</button>
-            <button class="btn btn-reset" onclick="resetDefaults()">Par defaut</button>
-            <span class="save-feedback" id="saveFeedback">Sauvegarde !</span>
+            <div class="slider-row">
+                <label>Pre-boom</label>
+                <input type="range" id="pre_boom_seconds" min="0.1" max="5" step="0.1" value="1.0">
+                <span class="slider-value" id="preBoomValue">1.0s</span>
+            </div>
+            <div class="slider-row">
+                <label>Post-boom</label>
+                <input type="range" id="post_boom_seconds" min="0.1" max="5" step="0.1" value="1.5">
+                <span class="slider-value" id="postBoomValue">1.5s</span>
+            </div>
+            <button class="btn btn-reset" onclick="resetDefaults()">Reset Defaults</button>
+            <span class="save-feedback" id="saveFeedback">Saved!</span>
         </div>
     </div>
 
@@ -314,46 +325,98 @@
         const socket = io();
         let threshold = 0.15;
 
-        // Update threshold indicator position
         function updateThresholdLine() {
             document.getElementById('vuThreshold').style.left = (threshold * 100) + '%';
         }
 
-        // Receive real-time audio level
+        function showSaved() {
+            var fb = document.getElementById('saveFeedback');
+            fb.style.opacity = 1;
+            setTimeout(function() { fb.style.opacity = 0; }, 1500);
+        }
+
+        function saveSettings() {
+            var t = parseFloat(document.getElementById('threshold').value);
+            var cd = parseInt(document.getElementById('cooldown_seconds').value);
+            var pre = parseFloat(document.getElementById('pre_boom_seconds').value);
+            var post = parseFloat(document.getElementById('post_boom_seconds').value);
+            if (isNaN(t) || isNaN(cd) || isNaN(pre) || isNaN(post)) return;
+            threshold = t;
+            updateThresholdLine();
+            socket.emit('save_config', {
+                threshold: t,
+                cooldown_seconds: cd,
+                pre_boom_seconds: pre,
+                post_boom_seconds: post,
+            });
+            showSaved();
+        }
+
+        // Threshold slider
+        var thresholdSlider = document.getElementById('threshold');
+        thresholdSlider.addEventListener('input', function() {
+            threshold = parseFloat(this.value);
+            document.getElementById('thresholdValue').textContent = threshold.toFixed(2);
+            updateThresholdLine();
+        });
+        thresholdSlider.addEventListener('change', function() { saveSettings(); });
+
+        // Cooldown slider
+        var cooldownSlider = document.getElementById('cooldown_seconds');
+        cooldownSlider.addEventListener('input', function() {
+            document.getElementById('cooldownValue').textContent = this.value + 's';
+        });
+        cooldownSlider.addEventListener('change', function() { saveSettings(); });
+
+        // Pre-boom slider
+        var preBoomSlider = document.getElementById('pre_boom_seconds');
+        preBoomSlider.addEventListener('input', function() {
+            document.getElementById('preBoomValue').textContent = parseFloat(this.value).toFixed(1) + 's';
+        });
+        preBoomSlider.addEventListener('change', function() { saveSettings(); });
+
+        // Post-boom slider
+        var postBoomSlider = document.getElementById('post_boom_seconds');
+        postBoomSlider.addEventListener('input', function() {
+            document.getElementById('postBoomValue').textContent = parseFloat(this.value).toFixed(1) + 's';
+        });
+        postBoomSlider.addEventListener('change', function() { saveSettings(); });
+
+        // RMS level
         socket.on('rms', function(data) {
-            const pct = Math.min(data.level * 100 / 0.5, 100);
+            var pct = Math.min(data.level * 100 / 0.5, 100);
             document.getElementById('vuBar').style.width = pct + '%';
-            document.getElementById('rmsValue').textContent = 'RMS: ' + data.level.toFixed(4);
+            document.getElementById('rmsValue').textContent = data.level.toFixed(4);
         });
 
         // Status updates
         socket.on('status', function(data) {
-            const dot = document.getElementById('statusDot');
-            const text = document.getElementById('statusText');
+            var dot = document.getElementById('statusDot');
+            var text = document.getElementById('statusText');
             dot.className = 'status-dot';
             if (data.state === 'disabled') {
                 dot.classList.add('disabled');
-                text.textContent = 'Desactive';
+                text.textContent = 'Disabled';
             } else if (data.state === 'boom') {
                 dot.classList.add('boom');
-                text.textContent = 'BOOM detecte !';
+                text.textContent = 'BOOM detected!';
             } else if (data.state === 'cooldown') {
                 dot.classList.add('cooldown');
                 text.textContent = 'Cooldown...';
             } else {
-                text.textContent = 'En ecoute...';
+                text.textContent = 'Listening...';
             }
         });
 
         // Toggle enable/disable
         socket.on('enabled_state', function(data) {
-            const btn = document.getElementById('toggleBtn');
+            var btn = document.getElementById('toggleBtn');
             if (data.enabled) {
                 btn.className = 'toggle-btn on';
-                btn.textContent = 'Desactiver';
+                btn.textContent = 'Disable';
             } else {
                 btn.className = 'toggle-btn off';
-                btn.textContent = 'Activer';
+                btn.textContent = 'Enable';
             }
         });
 
@@ -362,20 +425,20 @@
         }
 
         // Replay mode
-        const soundLabels = {
-            echo: 'Echo (rejouer le boom)',
-            alarm: 'Alarme',
-            doorbell: 'Sonnette',
-            hammer: 'Marteau',
-            honk: 'Klaxon',
-            siren: 'Sirene'
+        var soundLabels = {
+            echo: 'Echo (replay the boom)',
+            alarm: 'Alarm',
+            doorbell: 'Doorbell',
+            hammer: 'Hammer',
+            honk: 'Honk',
+            siren: 'Siren'
         };
 
         socket.on('replay_mode', function(data) {
-            const sel = document.getElementById('replayMode');
+            var sel = document.getElementById('replayMode');
             sel.innerHTML = '';
             data.available.forEach(function(s) {
-                const opt = document.createElement('option');
+                var opt = document.createElement('option');
                 opt.value = s;
                 opt.textContent = soundLabels[s] || s;
                 if (s === data.mode) opt.selected = true;
@@ -390,19 +453,15 @@
         // Boom detection event
         socket.on('boom', function(data) {
             document.getElementById('boomCount').textContent = data.today_count;
-
-            const list = document.getElementById('historyList');
-            const empty = list.querySelector('.history-empty');
+            var list = document.getElementById('historyList');
+            var empty = list.querySelector('.history-empty');
             if (empty) empty.remove();
-
-            const item = document.createElement('div');
+            var item = document.createElement('div');
             item.className = 'history-item';
             item.innerHTML = '<span class="history-time">' + data.time + '</span>' +
-                '<span>Duree: ' + data.duration.toFixed(1) + 's</span>' +
+                '<span>Duration: ' + data.duration.toFixed(1) + 's</span>' +
                 '<span class="history-rms">RMS: ' + data.rms.toFixed(4) + '</span>';
             list.insertBefore(item, list.firstChild);
-
-            // Keep max 50
             while (list.children.length > 50) {
                 list.removeChild(list.lastChild);
             }
@@ -412,63 +471,49 @@
         socket.on('config', function(data) {
             threshold = data.threshold;
             document.getElementById('threshold').value = data.threshold;
+            document.getElementById('thresholdValue').textContent = parseFloat(data.threshold).toFixed(2);
             document.getElementById('cooldown_seconds').value = data.cooldown_seconds;
+            document.getElementById('cooldownValue').textContent = data.cooldown_seconds + 's';
             document.getElementById('pre_boom_seconds').value = data.pre_boom_seconds;
+            document.getElementById('preBoomValue').textContent = parseFloat(data.pre_boom_seconds).toFixed(1) + 's';
             document.getElementById('post_boom_seconds').value = data.post_boom_seconds;
+            document.getElementById('postBoomValue').textContent = parseFloat(data.post_boom_seconds).toFixed(1) + 's';
             updateThresholdLine();
         });
 
         // Load history
         socket.on('history', function(data) {
-            const list = document.getElementById('historyList');
+            var list = document.getElementById('historyList');
             if (data.items.length === 0) return;
             list.innerHTML = '';
             document.getElementById('boomCount').textContent = data.today_count;
             data.items.forEach(function(item) {
-                const el = document.createElement('div');
+                var el = document.createElement('div');
                 el.className = 'history-item';
                 el.innerHTML = '<span class="history-time">' + item.time + '</span>' +
-                    '<span>Duree: ' + item.duration.toFixed(1) + 's</span>' +
+                    '<span>Duration: ' + item.duration.toFixed(1) + 's</span>' +
                     '<span class="history-rms">RMS: ' + item.rms.toFixed(4) + '</span>';
                 list.appendChild(el);
             });
         });
 
-        function parseNum(id) {
-            return parseFloat(document.getElementById(id).value.replace(',', '.'));
-        }
-
-        function saveSettings() {
-            var t = parseNum('threshold');
-            var cd = parseNum('cooldown_seconds');
-            var pre = parseNum('pre_boom_seconds');
-            var post = parseNum('post_boom_seconds');
-            if (isNaN(t) || isNaN(cd) || isNaN(pre) || isNaN(post)) return;
-            var settings = {
-                threshold: t,
-                cooldown_seconds: Math.round(cd),
-                pre_boom_seconds: pre,
-                post_boom_seconds: post,
-            };
-            threshold = settings.threshold;
-            updateThresholdLine();
-            socket.emit('save_config', settings);
-            var fb = document.getElementById('saveFeedback');
-            fb.style.opacity = 1;
-            setTimeout(function() { fb.style.opacity = 0; }, 2000);
-        }
-
         function resetDefaults() {
             document.getElementById('threshold').value = 0.15;
+            document.getElementById('thresholdValue').textContent = '0.15';
             document.getElementById('cooldown_seconds').value = 5;
+            document.getElementById('cooldownValue').textContent = '5s';
             document.getElementById('pre_boom_seconds').value = 1.0;
+            document.getElementById('preBoomValue').textContent = '1.0s';
             document.getElementById('post_boom_seconds').value = 1.5;
+            document.getElementById('postBoomValue').textContent = '1.5s';
+            threshold = 0.15;
+            updateThresholdLine();
             saveSettings();
         }
 
         // Volume slider
-        const volumeSlider = document.getElementById('volumeSlider');
-        const volumeValue = document.getElementById('volumeValue');
+        var volumeSlider = document.getElementById('volumeSlider');
+        var volumeValue = document.getElementById('volumeValue');
         volumeSlider.addEventListener('input', function() {
             volumeValue.textContent = this.value;
             socket.emit('set_volume', { level: parseInt(this.value) });
