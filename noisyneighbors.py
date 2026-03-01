@@ -38,6 +38,7 @@ state = {
     "config": {},
     "enabled": True,
     "cb_state": None,
+    "restart_audio": False,
 }
 
 CONFIG_PATH = "config.json"
@@ -89,6 +90,16 @@ def list_devices():
     print('  "device" : index of the device with input channels (mic)')
     print('  "alsa_device" : "plughw:<card>,0" for output')
     print()
+
+
+def list_input_devices():
+    """List sounddevice input devices."""
+    devices = sd.query_devices()
+    result = []
+    for i, d in enumerate(devices):
+        if d["max_input_channels"] > 0:
+            result.append({"id": i, "name": d["name"]})
+    return result
 
 
 def detect_device():
@@ -228,9 +239,11 @@ def on_connect():
         "mode": state["config"].get("replay_mode", "echo"),
         "available": AVAILABLE_SOUNDS,
     })
-    # Send device info and ALSA devices
-    if "device_info" in state:
-        socketio.emit("device_info", state["device_info"])
+    # Send device lists
+    socketio.emit("input_devices", {
+        "devices": list_input_devices(),
+        "current": state["config"].get("device"),
+    })
     socketio.emit("alsa_devices", {
         "devices": list_alsa_playback(),
         "current": state["config"].get("alsa_device", ""),
@@ -292,15 +305,24 @@ def on_set_replay_mode(data):
         log.info("Replay mode set to '%s' from dashboard", mode)
 
 
+@socketio.on("set_input_device")
+def on_set_input_device(data):
+    device = int(data["device"])
+    state["config"]["device"] = device
+    save_config(state["config"])
+    state["restart_audio"] = True
+    socketio.emit("input_devices", {
+        "devices": list_input_devices(),
+        "current": device,
+    })
+    log.info("Input device set to %d from dashboard, restarting audio...", device)
+
+
 @socketio.on("set_alsa_device")
 def on_set_alsa_device(data):
     device = data["device"]
     state["config"]["alsa_device"] = device
     save_config(state["config"])
-    # Update device_info display
-    if "device_info" in state:
-        state["device_info"]["output"] = device
-        socketio.emit("device_info", state["device_info"])
     socketio.emit("alsa_devices", {
         "devices": list_alsa_playback(),
         "current": device,
@@ -436,12 +458,6 @@ def audio_loop():
         except Exception as e:
             log.error("Error in audio callback: %s", e)
 
-    state["device_info"] = {
-        "input": dev_info["name"],
-        "output": alsa_device,
-    }
-    socketio.emit("device_info", state["device_info"])
-
     log.info("NoisyNeighbors started")
     log.info("  device=[%s] %s", device, dev_info["name"])
     log.info("  alsa_device=%s  sr=%d  out_sr=%d  channels=%d",
@@ -458,6 +474,10 @@ def audio_loop():
         ):
             log.info("Listening... (Ctrl+C to stop)")
             while True:
+                if state["restart_audio"]:
+                    state["restart_audio"] = False
+                    log.info("Audio restart requested")
+                    return
                 try:
                     boom_audio = boom_queue.get(timeout=0.1)
                 except queue.Empty:
@@ -533,8 +553,16 @@ def main():
     state["today_date"] = today
     state["today_count"] = len([h for h in state["history"] if h.get("date") == today])
 
-    # Start audio detection in background thread
-    audio_thread = threading.Thread(target=audio_loop, daemon=True)
+    # Start audio detection in background thread (auto-restarts)
+    def audio_loop_wrapper():
+        while True:
+            audio_loop()
+            if not state["restart_audio"] and state["enabled"]:
+                break
+            state["restart_audio"] = False
+            time.sleep(0.5)
+
+    audio_thread = threading.Thread(target=audio_loop_wrapper, daemon=True)
     audio_thread.start()
 
     # Start web server

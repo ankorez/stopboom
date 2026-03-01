@@ -256,9 +256,6 @@
                     <div class="boom-count-label">booms today</div>
                 </div>
             </div>
-            <div id="deviceInfo" style="margin-top: 12px; font-size: 13px; color: #666; display: none;">
-                Mic: <span id="inputDevice" style="color: #888;">-</span>
-            </div>
         </div>
 
         <div class="card">
@@ -280,10 +277,19 @@
         </div>
 
         <div class="card">
-            <h2>Output</h2>
-            <select class="sound-select" id="alsaDevice" onchange="setAlsaDevice(this.value)" style="margin-bottom: 12px;">
-                <option value="">Detecting...</option>
-            </select>
+            <h2>Devices</h2>
+            <div style="margin-bottom: 10px;">
+                <label style="font-size: 12px; color: #888; display: block; margin-bottom: 4px;">Input (mic)</label>
+                <select class="sound-select" id="inputDevice" onchange="setInputDevice(this.value)">
+                    <option value="">Detecting...</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 12px;">
+                <label style="font-size: 12px; color: #888; display: block; margin-bottom: 4px;">Output (speaker)</label>
+                <select class="sound-select" id="alsaDevice" onchange="setAlsaDevice(this.value)">
+                    <option value="">Detecting...</option>
+                </select>
+            </div>
             <div class="volume-row">
                 <input type="range" class="volume-slider" id="volumeSlider" min="0" max="11" step="1" value="11">
                 <span class="volume-value" id="volumeValue">11</span>
@@ -388,11 +394,22 @@
         });
         postBoomSlider.addEventListener('change', function() { saveSettings(); });
 
-        // Device info
-        socket.on('device_info', function(data) {
-            document.getElementById('inputDevice').textContent = data.input;
-            document.getElementById('deviceInfo').style.display = 'block';
+        // Input device selector
+        socket.on('input_devices', function(data) {
+            var sel = document.getElementById('inputDevice');
+            sel.innerHTML = '';
+            data.devices.forEach(function(d) {
+                var opt = document.createElement('option');
+                opt.value = d.id;
+                opt.textContent = d.name;
+                if (d.id === data.current) opt.selected = true;
+                sel.appendChild(opt);
+            });
         });
+
+        function setInputDevice(device) {
+            socket.emit('set_input_device', { device: parseInt(device) });
+        }
 
         // RMS level
         socket.on('rms', function(data) {
