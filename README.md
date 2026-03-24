@@ -1,6 +1,7 @@
 # NoisyNeighbors
 
 Detects neighbor booms and automatically plays them back. Includes a real-time web dashboard for monitoring and configuration.
+<img width="2074" height="1394" alt="image" src="https://github.com/user-attachments/assets/87140861-59c3-4cd9-9f0f-95a070aab987" />
 
 ## Hardware
 
