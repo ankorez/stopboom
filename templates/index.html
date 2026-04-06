@@ -20,11 +20,7 @@
         }
         .header h1 { font-size: 24px; }
         .header .subtitle { color: #888; font-size: 14px; margin-top: 4px; }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
         .card {
             background: #16213e;
             border-radius: 12px;
@@ -53,8 +49,7 @@
             font-weight: bold;
         }
         .status-dot {
-            width: 16px;
-            height: 16px;
+            width: 16px; height: 16px;
             border-radius: 50%;
             background: #4ecca3;
             animation: pulse 2s infinite;
@@ -73,571 +68,940 @@
         }
         .toggle-btn.on { background: #4ecca3; color: #1a1a2e; }
         .toggle-btn.off { background: #666; color: #eee; }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
-        .boom-count {
-            font-size: 48px;
-            font-weight: bold;
-            color: #e23e57;
-        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .boom-count { font-size: 48px; font-weight: bold; color: #e23e57; }
         .boom-count-label { color: #888; font-size: 14px; }
 
         /* VU Meter */
         .vu-container {
-            height: 32px;
-            background: #0f3460;
-            border-radius: 6px;
-            overflow: hidden;
-            position: relative;
+            height: 32px; background: #0f3460;
+            border-radius: 6px; overflow: hidden; position: relative;
         }
         .vu-bar {
-            height: 100%;
-            width: 0%;
+            height: 100%; width: 0%;
             background: linear-gradient(90deg, #4ecca3, #f0a500, #e23e57);
-            transition: width 0.1s;
-            border-radius: 6px;
+            transition: width 0.1s; border-radius: 6px;
         }
         .vu-threshold {
-            position: absolute;
-            top: 0;
-            height: 100%;
-            width: 2px;
-            background: #fff;
-            opacity: 0.6;
+            position: absolute; top: 0; height: 100%;
+            width: 2px; background: #fff; opacity: 0.6;
         }
         .vu-labels {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 4px;
-            font-size: 12px;
-            color: #666;
+            display: flex; justify-content: space-between;
+            margin-top: 4px; font-size: 12px; color: #666;
         }
 
         /* Sliders */
         .slider-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-top: 10px;
+            display: flex; align-items: center;
+            gap: 12px; margin-top: 10px;
         }
-        .slider-row label {
-            font-size: 13px;
-            color: #888;
-            min-width: 80px;
-        }
+        .slider-row label { font-size: 13px; color: #888; min-width: 80px; }
         .slider-row input[type="range"] {
-            flex: 1;
-            -webkit-appearance: none;
-            height: 8px;
-            border-radius: 4px;
-            background: #0f3460;
-            outline: none;
+            flex: 1; -webkit-appearance: none;
+            height: 8px; border-radius: 4px;
+            background: #0f3460; outline: none;
         }
         .slider-row input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #4ecca3;
-            cursor: pointer;
+            -webkit-appearance: none; width: 20px; height: 20px;
+            border-radius: 50%; background: #4ecca3; cursor: pointer;
         }
-        .slider-value {
-            min-width: 40px;
-            text-align: right;
-            font-weight: bold;
-            font-size: 14px;
-        }
+        .slider-value { min-width: 40px; text-align: right; font-weight: bold; font-size: 14px; }
 
         /* Volume */
-        .volume-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+        .volume-row { display: flex; align-items: center; gap: 12px; }
         .volume-slider {
-            flex: 1;
-            -webkit-appearance: none;
-            height: 8px;
-            border-radius: 4px;
-            background: #0f3460;
-            outline: none;
+            flex: 1; -webkit-appearance: none;
+            height: 8px; border-radius: 4px; background: #0f3460; outline: none;
         }
         .volume-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #4ecca3;
-            cursor: pointer;
+            -webkit-appearance: none; width: 20px; height: 20px;
+            border-radius: 50%; background: #4ecca3; cursor: pointer;
         }
-        .volume-value {
-            min-width: 40px;
-            text-align: right;
-            font-weight: bold;
-        }
+        .volume-value { min-width: 40px; text-align: right; font-weight: bold; }
 
         /* History */
-        .history-list {
-            max-height: 300px;
-            overflow-y: auto;
-        }
+        .history-list { max-height: 300px; overflow-y: auto; }
         .history-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #0f3460;
-            font-size: 14px;
+            display: flex; justify-content: space-between;
+            padding: 8px 0; border-bottom: 1px solid #0f3460; font-size: 14px;
         }
         .history-item:last-child { border-bottom: none; }
         .history-time { color: #888; }
         .history-rms { color: #e23e57; font-weight: bold; }
         .history-empty { color: #666; text-align: center; padding: 20px; }
+        .history-muted { opacity: 0.5; }
 
         /* Sound select */
         .sound-select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #0f3460;
-            border-radius: 6px;
-            background: #1a1a2e;
-            color: #eee;
-            font-size: 16px;
+            width: 100%; padding: 10px;
+            border: 1px solid #0f3460; border-radius: 6px;
+            background: #1a1a2e; color: #eee; font-size: 16px;
         }
 
         /* Buttons */
         .btn {
-            padding: 10px 24px;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            cursor: pointer;
-            font-weight: bold;
+            padding: 10px 24px; border: none;
+            border-radius: 6px; font-size: 14px;
+            cursor: pointer; font-weight: bold;
         }
-        .btn-reset {
-            background: #0f3460;
-            color: #888;
-            margin-top: 12px;
-        }
+        .btn-reset { background: #0f3460; color: #888; margin-top: 12px; }
         .btn-reset:hover { background: #1a4a8a; color: #eee; }
+        .btn-secondary { background: #0f3460; color: #eee; }
+        .btn-secondary:hover { background: #1a4a8a; }
         .save-feedback {
-            display: inline-block;
-            margin-left: 12px;
-            color: #4ecca3;
-            font-size: 14px;
-            opacity: 0;
-            transition: opacity 0.3s;
+            display: inline-block; margin-left: 12px;
+            color: #4ecca3; font-size: 14px;
+            opacity: 0; transition: opacity 0.3s;
+        }
+
+        /* Toggle switch */
+        .toggle-switch { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .switch-track {
+            width: 48px; height: 26px; background: #0f3460;
+            border-radius: 13px; position: relative;
+            transition: background 0.3s; cursor: pointer;
+        }
+        .switch-track::after {
+            content: ''; position: absolute;
+            width: 20px; height: 20px;
+            background: #888; border-radius: 50%;
+            top: 3px; left: 3px;
+            transition: transform 0.3s, background 0.3s;
+        }
+        .switch-track.on { background: #1a4a8a; }
+        .switch-track.on::after { transform: translateX(22px); background: #4ecca3; }
+        .switch-label { font-size: 14px; color: #888; }
+
+        /* Time inputs */
+        .time-input {
+            background: #0f3460; border: 1px solid #1a4a8a;
+            border-radius: 6px; color: #eee; padding: 8px 10px;
+            font-size: 14px; width: 100%; outline: none;
+        }
+        .time-row { display: flex; gap: 12px; margin-top: 12px; }
+        .time-col { flex: 1; }
+        .time-col label { font-size: 12px; color: #666; display: block; margin-bottom: 4px; }
+
+        /* Stat boxes */
+        .stat-boxes { display: flex; gap: 12px; margin-bottom: 16px; }
+        .stat-box {
+            flex: 1; background: #0f3460; border-radius: 8px;
+            padding: 12px; text-align: center;
+        }
+        .stat-value { font-size: 28px; font-weight: bold; color: #4ecca3; }
+        .stat-label { font-size: 12px; color: #666; margin-top: 4px; }
+
+        /* Chart */
+        .chart-title { font-size: 12px; color: #888; margin-bottom: 8px; margin-top: 16px; }
+
+        /* Recordings */
+        .recording-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 8px 0; border-bottom: 1px solid #0f3460; font-size: 13px;
+        }
+        .recording-item:last-child { border-bottom: none; }
+        .recording-name { color: #888; flex: 1; }
+        .recording-size { color: #666; margin: 0 12px; font-size: 12px; }
+        .recording-actions { display: flex; gap: 6px; }
+        .btn-tiny {
+            padding: 4px 10px; border: none; border-radius: 4px;
+            font-size: 12px; cursor: pointer; font-weight: bold;
+        }
+        .btn-play { background: #0f3460; color: #4ecca3; }
+        .btn-play:hover { background: #1a4a8a; }
+        .btn-del { background: #3d1a1a; color: #e23e57; }
+        .btn-del:hover { background: #5d2a2a; }
+
+        /* Limit indicator */
+        .limit-bar-wrap {
+            background: #0f3460; border-radius: 4px;
+            height: 6px; margin-top: 8px; overflow: hidden;
+        }
+        .limit-bar { height: 100%; background: #4ecca3; border-radius: 4px; transition: width 0.3s; }
+
+        /* Night mode badge */
+        .night-badge {
+            display: inline-block; background: #1a3060;
+            color: #4ecca3; font-size: 11px; padding: 2px 8px;
+            border-radius: 10px; margin-left: 8px; vertical-align: middle;
+        }
+
+        /* Calibration */
+        .calibrate-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+        .calibrate-progress {
+            flex: 1; height: 4px; background: #0f3460;
+            border-radius: 2px; overflow: hidden; display: none;
+        }
+        .calibrate-bar {
+            height: 100%; background: #4ecca3; width: 0%;
+            transition: width 0.1s linear;
         }
 
         @media (max-width: 600px) {
             .status-row { flex-direction: column; gap: 16px; text-align: center; }
             .slider-row label { min-width: 60px; }
+            .stat-boxes { flex-wrap: wrap; }
+            .stat-box { min-width: 80px; }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>NoisyNeighbors</h1>
-        <div class="subtitle">Noise Detection & Replay System</div>
-    </div>
+<div class="header">
+    <h1>NoisyNeighbors</h1>
+    <div class="subtitle">Noise Detection & Replay System</div>
+</div>
 
-    <div class="container">
-        <div class="card">
-            <h2>Status</h2>
-            <div class="status-row">
-                <div class="status-indicator">
-                    <div class="status-dot" id="statusDot"></div>
-                    <span id="statusText">Listening...</span>
-                </div>
-                <button class="toggle-btn on" id="toggleBtn" onclick="toggleEnabled()">Disable</button>
-                <div style="text-align: center;">
-                    <div class="boom-count" id="boomCount">0</div>
-                    <div class="boom-count-label">booms today</div>
-                </div>
-            </div>
-        </div>
+<div class="container">
 
-        <div class="card">
-            <h2>Detection Level</h2>
-            <div class="vu-container">
-                <div class="vu-bar" id="vuBar"></div>
-                <div class="vu-threshold" id="vuThreshold"></div>
+    <!-- Status -->
+    <div class="card">
+        <h2>Status</h2>
+        <div class="status-row">
+            <div class="status-indicator">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">Listening...</span>
+                <span class="night-badge" id="nightBadge" style="display:none;">Night</span>
             </div>
-            <div class="vu-labels">
-                <span>0</span>
-                <span id="rmsValue">0.0000</span>
-                <span>1.0</span>
-            </div>
-            <div class="slider-row">
-                <label>Threshold</label>
-                <input type="range" id="threshold" min="0.01" max="1" step="0.01" value="0.15">
-                <span class="slider-value" id="thresholdValue">0.15</span>
-            </div>
-        </div>
-
-        <div class="card">
-            <h2>Devices</h2>
-            <div style="margin-bottom: 10px;">
-                <label style="font-size: 12px; color: #888; display: block; margin-bottom: 4px;">Input (mic)</label>
-                <select class="sound-select" id="inputDevice" onchange="setInputDevice(this.value)">
-                    <option value="">Detecting...</option>
-                </select>
-            </div>
-            <div style="margin-bottom: 12px;">
-                <label style="font-size: 12px; color: #888; display: block; margin-bottom: 4px;">Output (speaker)</label>
-                <select class="sound-select" id="alsaDevice" onchange="setAlsaDevice(this.value)">
-                    <option value="">Detecting...</option>
-                </select>
-            </div>
-            <div class="volume-row">
-                <input type="range" class="volume-slider" id="volumeSlider" min="0" max="11" step="1" value="11">
-                <span class="volume-value" id="volumeValue">11</span>
-            </div>
-        </div>
-
-        <div class="card">
-            <h2>Response Sound</h2>
-            <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
-                <select class="sound-select" id="replayMode" onchange="setReplayMode(this.value)" style="flex: 1;">
-                    <option value="echo">Echo (replay the boom)</option>
-                </select>
-                <button class="btn" style="background: #0f3460; color: #eee; white-space: nowrap;" onclick="testSound()">Test</button>
-            </div>
-        </div>
-
-        <div class="card">
-            <h2>PS4 Controller</h2>
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <div id="ps4Dot" style="width: 10px; height: 10px; border-radius: 50%; background: #666;"></div>
-                    <span id="ps4Status" style="font-size: 14px; color: #888;">Not connected</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                        <span style="font-size: 14px; color: #888;">Vibrate on boom</span>
-                        <input type="checkbox" id="ps4Toggle" onchange="togglePs4(this.checked)" style="width: 18px; height: 18px; cursor: pointer;">
-                    </label>
-                    <button class="btn" style="background: #0f3460; color: #eee;" onclick="testVibration()">Test</button>
-                </div>
-            </div>
-            <div class="slider-row" id="vibrationRow" style="display: none;">
-                <label>Intensity</label>
-                <input type="range" id="vibrationIntensity" min="10" max="100" step="10" value="100">
-                <span class="slider-value" id="vibrationValue">100%</span>
-            </div>
-        </div>
-
-        <div class="card">
-            <h2>Settings</h2>
-            <div class="slider-row">
-                <label>Cooldown</label>
-                <input type="range" id="cooldown_seconds" min="0" max="30" step="1" value="5">
-                <span class="slider-value" id="cooldownValue">5s</span>
-            </div>
-            <div class="slider-row">
-                <label>Pre-boom</label>
-                <input type="range" id="pre_boom_seconds" min="0.1" max="5" step="0.1" value="1.0">
-                <span class="slider-value" id="preBoomValue">1.0s</span>
-            </div>
-            <div class="slider-row">
-                <label>Post-boom</label>
-                <input type="range" id="post_boom_seconds" min="0.1" max="5" step="0.1" value="1.5">
-                <span class="slider-value" id="postBoomValue">1.5s</span>
-            </div>
-            <button class="btn btn-reset" onclick="resetDefaults()">Reset Defaults</button>
-            <span class="save-feedback" id="saveFeedback">Saved!</span>
-        </div>
-
-        <div class="card">
-            <h2>History</h2>
-            <div class="history-list" id="historyList">
-                <div class="history-empty">No detections yet</div>
+            <button class="toggle-btn on" id="toggleBtn" onclick="toggleEnabled()">Disable</button>
+            <div style="text-align: center;">
+                <div class="boom-count" id="boomCount">0</div>
+                <div class="boom-count-label">booms today</div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.min.js"></script>
-    <script>
-        const socket = io();
-        let threshold = 0.15;
+    <!-- Detection Level -->
+    <div class="card">
+        <h2>Detection Level</h2>
+        <div class="vu-container">
+            <div class="vu-bar" id="vuBar"></div>
+            <div class="vu-threshold" id="vuThreshold"></div>
+        </div>
+        <div class="vu-labels">
+            <span>0</span>
+            <span id="rmsValue">0.0000</span>
+            <span>1.0</span>
+        </div>
+        <div class="slider-row">
+            <label>Threshold</label>
+            <input type="range" id="threshold" min="0.01" max="1" step="0.01" value="0.15">
+            <span class="slider-value" id="thresholdValue">0.15</span>
+        </div>
+        <div class="calibrate-row">
+            <button class="btn btn-secondary" id="calibrateBtn" onclick="startCalibration()">Auto-calibrate (5s)</button>
+            <div class="calibrate-progress" id="calibrateProgress">
+                <div class="calibrate-bar" id="calibrateBar"></div>
+            </div>
+            <span id="calibrateFeedback" style="font-size: 13px; color: #4ecca3;"></span>
+        </div>
+    </div>
 
-        function updateThresholdLine() {
-            document.getElementById('vuThreshold').style.left = (threshold * 100) + '%';
-        }
+    <!-- Devices -->
+    <div class="card">
+        <h2>Devices</h2>
+        <div style="margin-bottom: 10px;">
+            <label style="font-size: 12px; color: #888; display: block; margin-bottom: 4px;">Input (mic)</label>
+            <select class="sound-select" id="inputDevice" onchange="setInputDevice(this.value)">
+                <option value="">Detecting...</option>
+            </select>
+        </div>
+        <div style="margin-bottom: 12px;">
+            <label style="font-size: 12px; color: #888; display: block; margin-bottom: 4px;">Output (speaker)</label>
+            <select class="sound-select" id="alsaDevice" onchange="setAlsaDevice(this.value)">
+                <option value="">Detecting...</option>
+            </select>
+        </div>
+        <div class="volume-row">
+            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="11" step="1" value="11">
+            <span class="volume-value" id="volumeValue">11</span>
+        </div>
+    </div>
 
-        function showSaved() {
-            var fb = document.getElementById('saveFeedback');
-            fb.style.opacity = 1;
-            setTimeout(function() { fb.style.opacity = 0; }, 1500);
-        }
+    <!-- Response Sound -->
+    <div class="card">
+        <h2>Response Sound</h2>
+        <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+            <select class="sound-select" id="replayMode" onchange="setReplayMode(this.value)" style="flex: 1;"></select>
+            <button class="btn btn-secondary" style="white-space: nowrap;" onclick="testSound()">Test</button>
+        </div>
+    </div>
 
-        function saveSettings() {
-            var t = parseFloat(document.getElementById('threshold').value);
-            var cd = parseInt(document.getElementById('cooldown_seconds').value);
-            var pre = parseFloat(document.getElementById('pre_boom_seconds').value);
-            var post = parseFloat(document.getElementById('post_boom_seconds').value);
-            if (isNaN(t) || isNaN(cd) || isNaN(pre) || isNaN(post)) return;
-            threshold = t;
-            updateThresholdLine();
-            socket.emit('save_config', {
-                threshold: t,
-                cooldown_seconds: cd,
-                pre_boom_seconds: pre,
-                post_boom_seconds: post,
-            });
-            showSaved();
-        }
+    <!-- PS4 Controller -->
+    <div class="card">
+        <h2>PS4 Controller</h2>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <div id="ps4Dot" style="width: 10px; height: 10px; border-radius: 50%; background: #666;"></div>
+                <span id="ps4Status" style="font-size: 14px; color: #888;">Not connected</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <span style="font-size: 14px; color: #888;">Vibrate on boom</span>
+                    <input type="checkbox" id="ps4Toggle" onchange="togglePs4(this.checked)" style="width: 18px; height: 18px; cursor: pointer;">
+                </label>
+                <button class="btn btn-secondary" onclick="testVibration()">Test</button>
+            </div>
+        </div>
+        <div class="slider-row" id="vibrationRow" style="display: none;">
+            <label>Intensity</label>
+            <input type="range" id="vibrationIntensity" min="10" max="100" step="10" value="100">
+            <span class="slider-value" id="vibrationValue">100%</span>
+        </div>
+    </div>
 
-        // Threshold slider
-        var thresholdSlider = document.getElementById('threshold');
-        thresholdSlider.addEventListener('input', function() {
-            threshold = parseFloat(this.value);
-            document.getElementById('thresholdValue').textContent = threshold.toFixed(2);
-            updateThresholdLine();
+    <!-- Scheduler -->
+    <div class="card">
+        <h2>Scheduler</h2>
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <span style="font-size: 14px; color: #888;">Auto-enable on schedule</span>
+            <div class="toggle-switch" onclick="toggleSchedule()">
+                <div class="switch-track" id="scheduleTrack"></div>
+            </div>
+        </div>
+        <div class="time-row">
+            <div class="time-col">
+                <label>Enable at</label>
+                <input type="time" class="time-input" id="scheduleStart" value="22:00" onchange="saveSchedule()">
+            </div>
+            <div class="time-col">
+                <label>Disable at</label>
+                <input type="time" class="time-input" id="scheduleEnd" value="08:00" onchange="saveSchedule()">
+            </div>
+        </div>
+        <div id="scheduleStatus" style="font-size: 12px; color: #666; margin-top: 8px;"></div>
+    </div>
+
+    <!-- Night Mode -->
+    <div class="card">
+        <h2>Night Mode</h2>
+        <p style="font-size: 13px; color: #666; margin-bottom: 12px;">Different settings during night hours (lower threshold, different sound)</p>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <span style="font-size: 14px; color: #888;">Enable night mode</span>
+            <div class="toggle-switch" onclick="toggleNightMode()">
+                <div class="switch-track" id="nightModeTrack"></div>
+            </div>
+        </div>
+        <div class="time-row">
+            <div class="time-col">
+                <label>Night starts</label>
+                <input type="time" class="time-input" id="nightStart" value="22:00" onchange="saveNightMode()">
+            </div>
+            <div class="time-col">
+                <label>Night ends</label>
+                <input type="time" class="time-input" id="nightEnd" value="08:00" onchange="saveNightMode()">
+            </div>
+        </div>
+        <div class="slider-row">
+            <label>Night threshold</label>
+            <input type="range" id="nightThreshold" min="0.01" max="1" step="0.01" value="0.10" onchange="saveNightMode()">
+            <span class="slider-value" id="nightThresholdValue">0.10</span>
+        </div>
+        <div style="margin-top: 12px;">
+            <label style="font-size: 12px; color: #888; display: block; margin-bottom: 4px;">Night response sound</label>
+            <select class="sound-select" id="nightReplayMode" onchange="saveNightMode()"></select>
+        </div>
+    </div>
+
+    <!-- Settings -->
+    <div class="card">
+        <h2>Settings</h2>
+        <div class="slider-row">
+            <label>Cooldown</label>
+            <input type="range" id="cooldown_seconds" min="0" max="30" step="1" value="5">
+            <span class="slider-value" id="cooldownValue">5s</span>
+        </div>
+        <div class="slider-row">
+            <label>Pre-boom</label>
+            <input type="range" id="pre_boom_seconds" min="0.1" max="5" step="0.1" value="1.0">
+            <span class="slider-value" id="preBoomValue">1.0s</span>
+        </div>
+        <div class="slider-row">
+            <label>Post-boom</label>
+            <input type="range" id="post_boom_seconds" min="0.1" max="5" step="0.1" value="1.5">
+            <span class="slider-value" id="postBoomValue">1.5s</span>
+        </div>
+        <button class="btn btn-reset" onclick="resetDefaults()">Reset Defaults</button>
+        <span class="save-feedback" id="saveFeedback">Saved!</span>
+    </div>
+
+    <!-- Rate Limiting -->
+    <div class="card">
+        <h2>Rate Limiting</h2>
+        <p style="font-size: 13px; color: #666; margin-bottom: 12px;">Cap the number of responses per hour to avoid an escalating cycle</p>
+        <div class="slider-row">
+            <label>Max/hour</label>
+            <input type="range" id="maxBoomsPerHour" min="0" max="50" step="1" value="0" oninput="updateMaxBooms(this.value)" onchange="saveLimits()">
+            <span class="slider-value" id="maxBoomsValue">&#8734;</span>
+        </div>
+        <div style="margin-top: 10px; font-size: 12px; color: #666;">
+            This hour: <span id="hourlyCount">0</span>
+            <span id="hourlyLimitText"></span>
+        </div>
+        <div class="limit-bar-wrap" id="limitBarWrap" style="display: none;">
+            <div class="limit-bar" id="limitBar" style="width: 0%"></div>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="card">
+        <h2>Statistics</h2>
+        <div class="stat-boxes">
+            <div class="stat-box">
+                <div class="stat-value" id="statToday">0</div>
+                <div class="stat-label">Today</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="statWeek">0</div>
+                <div class="stat-label">This week</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="statTotal">0</div>
+                <div class="stat-label">All time</div>
+            </div>
+        </div>
+        <div class="chart-title">Booms per hour (last 24h)</div>
+        <canvas id="hourlyChart" height="100"></canvas>
+        <div class="chart-title">Booms per day (last 7 days)</div>
+        <canvas id="dailyChart" height="80"></canvas>
+    </div>
+
+    <!-- History -->
+    <div class="card">
+        <h2>History</h2>
+        <div class="history-list" id="historyList">
+            <div class="history-empty">No detections yet</div>
+        </div>
+    </div>
+
+    <!-- Recordings -->
+    <div class="card">
+        <h2>Recordings</h2>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <span style="font-size: 14px; color: #888;">Save boom audio clips</span>
+            <div class="toggle-switch" onclick="toggleSaveRecordings()">
+                <div class="switch-track" id="saveRecordingsTrack"></div>
+            </div>
+        </div>
+        <div id="recordingsList">
+            <div class="history-empty">No recordings yet</div>
+        </div>
+        <div style="margin-top: 8px; font-size: 12px; color: #666;" id="recordingsHint"></div>
+    </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const socket = io();
+let threshold = 0.15;
+let scheduleEnabled = false;
+let nightModeEnabled = false;
+let saveRecordingsEnabled = false;
+let maxBoomsPerHour = 0;
+let hourlyCount = 0;
+let hourlyChart, dailyChart;
+
+// ---- Chart.js setup ----
+const chartDefaults = {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+        y: {
+            beginAtZero: true, ticks: { color: '#888', stepSize: 1 },
+            grid: { color: '#0f3460' }
+        },
+        x: { ticks: { color: '#888', maxRotation: 45 }, grid: { color: '#0f3460' } }
+    }
+};
+
+function initCharts() {
+    hourlyChart = new Chart(document.getElementById('hourlyChart'), {
+        type: 'bar',
+        data: { labels: [], datasets: [{ data: [], backgroundColor: '#e23e57', borderRadius: 3 }] },
+        options: { ...chartDefaults }
+    });
+    dailyChart = new Chart(document.getElementById('dailyChart'), {
+        type: 'bar',
+        data: { labels: [], datasets: [{ data: [], backgroundColor: '#4ecca3', borderRadius: 3 }] },
+        options: { ...chartDefaults }
+    });
+}
+initCharts();
+
+// ---- Threshold ----
+function updateThresholdLine() {
+    document.getElementById('vuThreshold').style.left = (threshold * 100) + '%';
+}
+
+var thresholdSlider = document.getElementById('threshold');
+thresholdSlider.addEventListener('input', function() {
+    threshold = parseFloat(this.value);
+    document.getElementById('thresholdValue').textContent = threshold.toFixed(2);
+    updateThresholdLine();
+});
+thresholdSlider.addEventListener('change', function() { saveSettings(); });
+
+// ---- Calibration ----
+function startCalibration() {
+    socket.emit('calibrate_threshold');
+    document.getElementById('calibrateBtn').disabled = true;
+    document.getElementById('calibrateFeedback').textContent = 'Measuring...';
+    document.getElementById('calibrateProgress').style.display = 'block';
+    var bar = document.getElementById('calibrateBar');
+    bar.style.transition = 'none';
+    bar.style.width = '0%';
+    setTimeout(function() {
+        bar.style.transition = 'width 5s linear';
+        bar.style.width = '100%';
+    }, 50);
+}
+
+socket.on('calibration_started', function() {});
+
+socket.on('calibration_done', function(data) {
+    document.getElementById('calibrateBtn').disabled = false;
+    document.getElementById('calibrateProgress').style.display = 'none';
+    document.getElementById('calibrateBar').style.width = '0%';
+    if (data.error) {
+        document.getElementById('calibrateFeedback').textContent = 'Error: ' + data.error;
+        return;
+    }
+    threshold = data.threshold;
+    document.getElementById('threshold').value = threshold;
+    document.getElementById('thresholdValue').textContent = threshold.toFixed(4);
+    updateThresholdLine();
+    document.getElementById('calibrateFeedback').textContent = '→ ' + threshold.toFixed(4);
+    setTimeout(function() { document.getElementById('calibrateFeedback').textContent = ''; }, 3000);
+});
+
+// ---- Settings ----
+function showSaved() {
+    var fb = document.getElementById('saveFeedback');
+    fb.style.opacity = 1;
+    setTimeout(function() { fb.style.opacity = 0; }, 1500);
+}
+
+function saveSettings() {
+    var t = parseFloat(document.getElementById('threshold').value);
+    var cd = parseInt(document.getElementById('cooldown_seconds').value);
+    var pre = parseFloat(document.getElementById('pre_boom_seconds').value);
+    var post = parseFloat(document.getElementById('post_boom_seconds').value);
+    if (isNaN(t) || isNaN(cd) || isNaN(pre) || isNaN(post)) return;
+    threshold = t;
+    updateThresholdLine();
+    socket.emit('save_config', { threshold: t, cooldown_seconds: cd, pre_boom_seconds: pre, post_boom_seconds: post });
+    showSaved();
+}
+
+var cooldownSlider = document.getElementById('cooldown_seconds');
+cooldownSlider.addEventListener('input', function() {
+    document.getElementById('cooldownValue').textContent = this.value + 's';
+});
+cooldownSlider.addEventListener('change', function() { saveSettings(); });
+
+var preBoomSlider = document.getElementById('pre_boom_seconds');
+preBoomSlider.addEventListener('input', function() {
+    document.getElementById('preBoomValue').textContent = parseFloat(this.value).toFixed(1) + 's';
+});
+preBoomSlider.addEventListener('change', function() { saveSettings(); });
+
+var postBoomSlider = document.getElementById('post_boom_seconds');
+postBoomSlider.addEventListener('input', function() {
+    document.getElementById('postBoomValue').textContent = parseFloat(this.value).toFixed(1) + 's';
+});
+postBoomSlider.addEventListener('change', function() { saveSettings(); });
+
+function resetDefaults() {
+    document.getElementById('threshold').value = 0.15;
+    document.getElementById('thresholdValue').textContent = '0.15';
+    document.getElementById('cooldown_seconds').value = 5;
+    document.getElementById('cooldownValue').textContent = '5s';
+    document.getElementById('pre_boom_seconds').value = 1.0;
+    document.getElementById('preBoomValue').textContent = '1.0s';
+    document.getElementById('post_boom_seconds').value = 1.5;
+    document.getElementById('postBoomValue').textContent = '1.5s';
+    threshold = 0.15;
+    updateThresholdLine();
+    saveSettings();
+}
+
+// ---- RMS / Status ----
+socket.on('rms', function(data) {
+    var pct = Math.min(data.level * 100 / 0.5, 100);
+    document.getElementById('vuBar').style.width = pct + '%';
+    document.getElementById('rmsValue').textContent = data.level.toFixed(4);
+});
+
+socket.on('status', function(data) {
+    var dot = document.getElementById('statusDot');
+    var text = document.getElementById('statusText');
+    dot.className = 'status-dot';
+    if (data.state === 'disabled') {
+        dot.classList.add('disabled'); text.textContent = 'Disabled';
+    } else if (data.state === 'boom') {
+        dot.classList.add('boom'); text.textContent = 'BOOM detected!';
+    } else if (data.state === 'cooldown') {
+        dot.classList.add('cooldown'); text.textContent = 'Cooldown...';
+    } else {
+        text.textContent = 'Listening...';
+    }
+    updateNightBadge();
+});
+
+function updateNightBadge() {
+    if (!nightModeEnabled) { document.getElementById('nightBadge').style.display = 'none'; return; }
+    var start = document.getElementById('nightStart').value;
+    var end = document.getElementById('nightEnd').value;
+    var now = new Date();
+    var cur = now.getHours() * 60 + now.getMinutes();
+    var s = parseInt(start.split(':')[0]) * 60 + parseInt(start.split(':')[1]);
+    var e = parseInt(end.split(':')[0]) * 60 + parseInt(end.split(':')[1]);
+    var active = s <= e ? (cur >= s && cur <= e) : (cur >= s || cur <= e);
+    document.getElementById('nightBadge').style.display = active ? 'inline-block' : 'none';
+}
+
+// ---- Enable/Disable ----
+socket.on('enabled_state', function(data) {
+    var btn = document.getElementById('toggleBtn');
+    if (data.enabled) {
+        btn.className = 'toggle-btn on'; btn.textContent = 'Disable';
+    } else {
+        btn.className = 'toggle-btn off'; btn.textContent = 'Enable';
+    }
+});
+
+function toggleEnabled() { socket.emit('toggle_enabled'); }
+
+// ---- Replay mode ----
+var soundLabels = {
+    echo: 'Echo (replay the boom)', alarm: 'Alarm', doorbell: 'Doorbell',
+    hammer: 'Hammer', honk: 'Honk', siren: 'Siren',
+};
+
+socket.on('replay_mode', function(data) {
+    ['replayMode', 'nightReplayMode'].forEach(function(id) {
+        var sel = document.getElementById(id);
+        var cur = sel.value;
+        sel.innerHTML = '';
+        data.available.forEach(function(s) {
+            var opt = document.createElement('option');
+            opt.value = s;
+            opt.textContent = soundLabels[s] || s;
+            if ((id === 'replayMode' && s === data.mode) || (id !== 'replayMode' && s === cur)) opt.selected = true;
+            sel.appendChild(opt);
         });
-        thresholdSlider.addEventListener('change', function() { saveSettings(); });
+    });
+});
 
-        // Cooldown slider
-        var cooldownSlider = document.getElementById('cooldown_seconds');
-        cooldownSlider.addEventListener('input', function() {
-            document.getElementById('cooldownValue').textContent = this.value + 's';
-        });
-        cooldownSlider.addEventListener('change', function() { saveSettings(); });
+function setReplayMode(mode) { socket.emit('set_replay_mode', { mode: mode }); }
+function testSound() { socket.emit('test_sound'); }
+function testVibration() { socket.emit('test_vibration'); }
 
-        // Pre-boom slider
-        var preBoomSlider = document.getElementById('pre_boom_seconds');
-        preBoomSlider.addEventListener('input', function() {
-            document.getElementById('preBoomValue').textContent = parseFloat(this.value).toFixed(1) + 's';
-        });
-        preBoomSlider.addEventListener('change', function() { saveSettings(); });
+// ---- PS4 ----
+socket.on('ps4_status', function(data) {
+    document.getElementById('ps4Dot').style.background = data.connected ? '#4ecca3' : '#666';
+    document.getElementById('ps4Status').textContent = data.connected ? 'Connected' : 'Not connected';
+    document.getElementById('ps4Toggle').checked = data.enabled;
+    document.getElementById('vibrationRow').style.display = data.enabled ? 'flex' : 'none';
+    document.getElementById('vibrationIntensity').value = data.intensity;
+    document.getElementById('vibrationValue').textContent = data.intensity + '%';
+});
 
-        // Post-boom slider
-        var postBoomSlider = document.getElementById('post_boom_seconds');
-        postBoomSlider.addEventListener('input', function() {
-            document.getElementById('postBoomValue').textContent = parseFloat(this.value).toFixed(1) + 's';
-        });
-        postBoomSlider.addEventListener('change', function() { saveSettings(); });
+function togglePs4(enabled) {
+    socket.emit('toggle_ps4_vibration', { enabled: enabled });
+    document.getElementById('vibrationRow').style.display = enabled ? 'flex' : 'none';
+    showSaved();
+}
 
-        // Input device selector
-        socket.on('input_devices', function(data) {
-            var sel = document.getElementById('inputDevice');
-            sel.innerHTML = '';
-            data.devices.forEach(function(d) {
-                var opt = document.createElement('option');
-                opt.value = d.id;
-                opt.textContent = d.name;
-                if (d.id === data.current) opt.selected = true;
-                sel.appendChild(opt);
-            });
-        });
+var vibrationSlider = document.getElementById('vibrationIntensity');
+vibrationSlider.addEventListener('input', function() {
+    document.getElementById('vibrationValue').textContent = this.value + '%';
+});
+vibrationSlider.addEventListener('change', function() {
+    socket.emit('set_vibration_intensity', { intensity: parseInt(this.value) });
+    showSaved();
+});
 
-        function setInputDevice(device) {
-            socket.emit('set_input_device', { device: parseInt(device) });
-        }
+// ---- Devices ----
+socket.on('input_devices', function(data) {
+    var sel = document.getElementById('inputDevice');
+    sel.innerHTML = '';
+    data.devices.forEach(function(d) {
+        var opt = document.createElement('option');
+        opt.value = d.id;
+        opt.textContent = d.name;
+        if (d.id === data.current) opt.selected = true;
+        sel.appendChild(opt);
+    });
+});
 
-        // RMS level
-        socket.on('rms', function(data) {
-            var pct = Math.min(data.level * 100 / 0.5, 100);
-            document.getElementById('vuBar').style.width = pct + '%';
-            document.getElementById('rmsValue').textContent = data.level.toFixed(4);
-        });
+function setInputDevice(device) { socket.emit('set_input_device', { device: parseInt(device) }); }
 
-        // Status updates
-        socket.on('status', function(data) {
-            var dot = document.getElementById('statusDot');
-            var text = document.getElementById('statusText');
-            dot.className = 'status-dot';
-            if (data.state === 'disabled') {
-                dot.classList.add('disabled');
-                text.textContent = 'Disabled';
-            } else if (data.state === 'boom') {
-                dot.classList.add('boom');
-                text.textContent = 'BOOM detected!';
-            } else if (data.state === 'cooldown') {
-                dot.classList.add('cooldown');
-                text.textContent = 'Cooldown...';
-            } else {
-                text.textContent = 'Listening...';
+socket.on('alsa_devices', function(data) {
+    var sel = document.getElementById('alsaDevice');
+    sel.innerHTML = '';
+    data.devices.forEach(function(d) {
+        var opt = document.createElement('option');
+        opt.value = d.id;
+        opt.textContent = d.name + ' (' + d.id + ')';
+        if (d.id === data.current) opt.selected = true;
+        sel.appendChild(opt);
+    });
+});
+
+function setAlsaDevice(device) { socket.emit('set_alsa_device', { device: device }); }
+
+var volumeSlider = document.getElementById('volumeSlider');
+volumeSlider.addEventListener('input', function() {
+    document.getElementById('volumeValue').textContent = this.value;
+    socket.emit('set_volume', { level: parseInt(this.value) });
+});
+
+socket.on('volume', function(data) {
+    volumeSlider.value = data.level;
+    volumeSlider.max = data.max;
+    document.getElementById('volumeValue').textContent = data.level;
+});
+
+// ---- Scheduler ----
+function setTrack(id, on) {
+    var t = document.getElementById(id);
+    if (on) t.classList.add('on'); else t.classList.remove('on');
+}
+
+function toggleSchedule() {
+    scheduleEnabled = !scheduleEnabled;
+    setTrack('scheduleTrack', scheduleEnabled);
+    saveSchedule();
+}
+
+function saveSchedule() {
+    var start = document.getElementById('scheduleStart').value;
+    var end = document.getElementById('scheduleEnd').value;
+    socket.emit('save_schedule', { enabled: scheduleEnabled, start: start, end: end });
+    updateScheduleStatus();
+}
+
+function updateScheduleStatus() {
+    var el = document.getElementById('scheduleStatus');
+    if (!scheduleEnabled) { el.textContent = ''; return; }
+    var start = document.getElementById('scheduleStart').value;
+    var end = document.getElementById('scheduleEnd').value;
+    el.textContent = 'Active: ' + start + ' → ' + end + ' (checks every 30s)';
+}
+
+// ---- Night Mode ----
+function toggleNightMode() {
+    nightModeEnabled = !nightModeEnabled;
+    setTrack('nightModeTrack', nightModeEnabled);
+    saveNightMode();
+    updateNightBadge();
+}
+
+function saveNightMode() {
+    var start = document.getElementById('nightStart').value;
+    var end = document.getElementById('nightEnd').value;
+    var t = parseFloat(document.getElementById('nightThreshold').value);
+    var mode = document.getElementById('nightReplayMode').value;
+    socket.emit('save_night_mode', { enabled: nightModeEnabled, start: start, end: end, threshold: t, replay_mode: mode });
+}
+
+document.getElementById('nightThreshold').addEventListener('input', function() {
+    document.getElementById('nightThresholdValue').textContent = parseFloat(this.value).toFixed(2);
+});
+
+// ---- Rate Limiting ----
+function updateMaxBooms(val) {
+    maxBoomsPerHour = parseInt(val);
+    document.getElementById('maxBoomsValue').textContent = maxBoomsPerHour === 0 ? '∞' : val;
+    var wrap = document.getElementById('limitBarWrap');
+    wrap.style.display = maxBoomsPerHour > 0 ? 'block' : 'none';
+    updateLimitBar();
+}
+
+function updateLimitBar() {
+    if (maxBoomsPerHour === 0) return;
+    var pct = Math.min(100, (hourlyCount / maxBoomsPerHour) * 100);
+    var bar = document.getElementById('limitBar');
+    bar.style.width = pct + '%';
+    bar.style.background = pct >= 100 ? '#e23e57' : pct >= 75 ? '#f0a500' : '#4ecca3';
+    document.getElementById('hourlyLimitText').textContent = ' / ' + maxBoomsPerHour;
+}
+
+function saveLimits() {
+    socket.emit('save_limits', { max_booms_per_hour: maxBoomsPerHour });
+}
+
+// ---- Statistics ----
+socket.on('stats', function(data) {
+    document.getElementById('statToday').textContent = data.today;
+    document.getElementById('statWeek').textContent = data.week;
+    document.getElementById('statTotal').textContent = data.total;
+
+    hourlyChart.data.labels = data.hourly.labels;
+    hourlyChart.data.datasets[0].data = data.hourly.data;
+    hourlyChart.update();
+
+    dailyChart.data.labels = data.daily.labels;
+    dailyChart.data.datasets[0].data = data.daily.data;
+    dailyChart.update();
+});
+
+// Refresh stats every 60s
+setInterval(function() { socket.emit('get_stats'); }, 60000);
+
+// ---- Boom events ----
+socket.on('boom', function(data) {
+    document.getElementById('boomCount').textContent = data.today_count;
+    hourlyCount = data.hourly_count || 0;
+    document.getElementById('hourlyCount').textContent = hourlyCount;
+    updateLimitBar();
+
+    var list = document.getElementById('historyList');
+    var empty = list.querySelector('.history-empty');
+    if (empty) empty.remove();
+    var item = document.createElement('div');
+    item.className = 'history-item' + (data.limit_reached ? ' history-muted' : '');
+    var muted = data.limit_reached ? ' <span style="color:#f0a500;font-size:11px;">[muted]</span>' : '';
+    item.innerHTML = '<span class="history-time">' + data.time + '</span>' +
+        '<span>Duration: ' + data.duration.toFixed(1) + 's</span>' +
+        '<span class="history-rms">RMS: ' + data.rms.toFixed(4) + '</span>' + muted;
+    list.insertBefore(item, list.firstChild);
+    while (list.children.length > 50) list.removeChild(list.lastChild);
+});
+
+// ---- Config loading ----
+socket.on('config', function(data) {
+    threshold = data.threshold;
+    document.getElementById('threshold').value = data.threshold;
+    document.getElementById('thresholdValue').textContent = parseFloat(data.threshold).toFixed(2);
+    document.getElementById('cooldown_seconds').value = data.cooldown_seconds;
+    document.getElementById('cooldownValue').textContent = data.cooldown_seconds + 's';
+    document.getElementById('pre_boom_seconds').value = data.pre_boom_seconds;
+    document.getElementById('preBoomValue').textContent = parseFloat(data.pre_boom_seconds).toFixed(1) + 's';
+    document.getElementById('post_boom_seconds').value = data.post_boom_seconds;
+    document.getElementById('postBoomValue').textContent = parseFloat(data.post_boom_seconds).toFixed(1) + 's';
+    updateThresholdLine();
+});
+
+socket.on('extended_config', function(data) {
+    // Scheduler
+    scheduleEnabled = data.schedule_enabled;
+    setTrack('scheduleTrack', scheduleEnabled);
+    document.getElementById('scheduleStart').value = data.schedule_start;
+    document.getElementById('scheduleEnd').value = data.schedule_end;
+    updateScheduleStatus();
+
+    // Night mode
+    nightModeEnabled = data.night_mode_enabled;
+    setTrack('nightModeTrack', nightModeEnabled);
+    document.getElementById('nightStart').value = data.night_mode_start;
+    document.getElementById('nightEnd').value = data.night_mode_end;
+    document.getElementById('nightThreshold').value = data.night_threshold;
+    document.getElementById('nightThresholdValue').textContent = parseFloat(data.night_threshold).toFixed(2);
+    // Night replay mode will be set when replay_mode event fires
+    setTimeout(function() {
+        var sel = document.getElementById('nightReplayMode');
+        for (var i = 0; i < sel.options.length; i++) {
+            if (sel.options[i].value === data.night_replay_mode) {
+                sel.selectedIndex = i; break;
             }
-        });
-
-        // Toggle enable/disable
-        socket.on('enabled_state', function(data) {
-            var btn = document.getElementById('toggleBtn');
-            if (data.enabled) {
-                btn.className = 'toggle-btn on';
-                btn.textContent = 'Disable';
-            } else {
-                btn.className = 'toggle-btn off';
-                btn.textContent = 'Enable';
-            }
-        });
-
-        function toggleEnabled() {
-            socket.emit('toggle_enabled');
         }
+    }, 200);
+    updateNightBadge();
 
-        // Replay mode
-        var soundLabels = {
-            echo: 'Echo (replay the boom)',
-            alarm: 'Alarm',
-            doorbell: 'Doorbell',
-            hammer: 'Hammer',
-            honk: 'Honk',
-            siren: 'Siren',
-        };
+    // Rate limiting
+    maxBoomsPerHour = data.max_booms_per_hour;
+    document.getElementById('maxBoomsPerHour').value = maxBoomsPerHour;
+    updateMaxBooms(maxBoomsPerHour);
 
-        socket.on('replay_mode', function(data) {
-            var sel = document.getElementById('replayMode');
-            sel.innerHTML = '';
-            data.available.forEach(function(s) {
-                var opt = document.createElement('option');
-                opt.value = s;
-                opt.textContent = soundLabels[s] || s;
-                if (s === data.mode) opt.selected = true;
-                sel.appendChild(opt);
-            });
-        });
+    // Recordings
+    saveRecordingsEnabled = data.save_recordings;
+    setTrack('saveRecordingsTrack', saveRecordingsEnabled);
+    if (saveRecordingsEnabled) loadRecordings();
+});
 
-        function setReplayMode(mode) {
-            socket.emit('set_replay_mode', { mode: mode });
+// ---- History ----
+socket.on('history', function(data) {
+    var list = document.getElementById('historyList');
+    if (data.items.length === 0) return;
+    list.innerHTML = '';
+    document.getElementById('boomCount').textContent = data.today_count;
+    data.items.forEach(function(item) {
+        var el = document.createElement('div');
+        el.className = 'history-item';
+        el.innerHTML = '<span class="history-time">' + item.time + '</span>' +
+            '<span>Duration: ' + item.duration.toFixed(1) + 's</span>' +
+            '<span class="history-rms">RMS: ' + item.rms.toFixed(4) + '</span>';
+        list.appendChild(el);
+    });
+});
+
+// ---- Recordings ----
+function toggleSaveRecordings() {
+    saveRecordingsEnabled = !saveRecordingsEnabled;
+    setTrack('saveRecordingsTrack', saveRecordingsEnabled);
+    socket.emit('set_save_recordings', { enabled: saveRecordingsEnabled });
+    if (saveRecordingsEnabled) loadRecordings();
+}
+
+function loadRecordings() {
+    fetch('/recordings-list').then(function(r) { return r.json(); }).then(function(files) {
+        var list = document.getElementById('recordingsList');
+        if (files.length === 0) {
+            list.innerHTML = '<div class="history-empty">No recordings yet</div>';
+            return;
         }
-
-        function testSound() {
-            socket.emit('test_sound');
-        }
-
-        function testVibration() {
-            socket.emit('test_vibration');
-        }
-
-        // PS4 Controller
-        socket.on('ps4_status', function(data) {
-            var dot = document.getElementById('ps4Dot');
-            var status = document.getElementById('ps4Status');
-            var toggle = document.getElementById('ps4Toggle');
-            if (data.connected) {
-                dot.style.background = '#4ecca3';
-                status.textContent = 'Connected';
-            } else {
-                dot.style.background = '#666';
-                status.textContent = 'Not connected';
-            }
-            toggle.checked = data.enabled;
-            document.getElementById('vibrationRow').style.display = data.enabled ? 'flex' : 'none';
-            document.getElementById('vibrationIntensity').value = data.intensity;
-            document.getElementById('vibrationValue').textContent = data.intensity + '%';
+        list.innerHTML = '';
+        files.forEach(function(f) {
+            var el = document.createElement('div');
+            el.className = 'recording-item';
+            el.id = 'rec_' + f.name;
+            var dt = formatRecordingName(f.name);
+            var size = (f.size / 1024).toFixed(0) + ' KB';
+            el.innerHTML = '<span class="recording-name">' + dt + '</span>' +
+                '<span class="recording-size">' + size + '</span>' +
+                '<div class="recording-actions">' +
+                '<button class="btn-tiny btn-play" onclick="playRecording(\'' + f.name + '\')">&#9654; Play</button>' +
+                '<a href="/recordings/' + f.name + '" download class="btn-tiny btn-play" style="text-decoration:none;">&#8659;</a>' +
+                '<button class="btn-tiny btn-del" onclick="deleteRecording(\'' + f.name + '\')">&#215;</button>' +
+                '</div>';
+            list.appendChild(el);
         });
+        document.getElementById('recordingsHint').textContent = files.length + ' recording' + (files.length > 1 ? 's' : '');
+    }).catch(function() {});
+}
 
-        function togglePs4(enabled) {
-            socket.emit('toggle_ps4_vibration', { enabled: enabled });
-            document.getElementById('vibrationRow').style.display = enabled ? 'flex' : 'none';
-            showSaved();
-        }
+function formatRecordingName(name) {
+    var m = name.match(/boom_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/);
+    if (!m) return name;
+    return m[3] + '/' + m[2] + '/' + m[1] + '  ' + m[4] + ':' + m[5] + ':' + m[6];
+}
 
-        var vibrationSlider = document.getElementById('vibrationIntensity');
-        vibrationSlider.addEventListener('input', function() {
-            document.getElementById('vibrationValue').textContent = this.value + '%';
-        });
-        vibrationSlider.addEventListener('change', function() {
-            socket.emit('set_vibration_intensity', { intensity: parseInt(this.value) });
-            showSaved();
-        });
+var currentAudio = null;
+function playRecording(name) {
+    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+    currentAudio = new Audio('/recordings/' + name);
+    currentAudio.play();
+}
 
-        // Boom detection event
-        socket.on('boom', function(data) {
-            document.getElementById('boomCount').textContent = data.today_count;
-            var list = document.getElementById('historyList');
-            var empty = list.querySelector('.history-empty');
-            if (empty) empty.remove();
-            var item = document.createElement('div');
-            item.className = 'history-item';
-            item.innerHTML = '<span class="history-time">' + data.time + '</span>' +
-                '<span>Duration: ' + data.duration.toFixed(1) + 's</span>' +
-                '<span class="history-rms">RMS: ' + data.rms.toFixed(4) + '</span>';
-            list.insertBefore(item, list.firstChild);
-            while (list.children.length > 50) {
-                list.removeChild(list.lastChild);
-            }
-        });
+function deleteRecording(name) {
+    socket.emit('delete_recording', { name: name });
+}
 
-        // Load config
-        socket.on('config', function(data) {
-            threshold = data.threshold;
-            document.getElementById('threshold').value = data.threshold;
-            document.getElementById('thresholdValue').textContent = parseFloat(data.threshold).toFixed(2);
-            document.getElementById('cooldown_seconds').value = data.cooldown_seconds;
-            document.getElementById('cooldownValue').textContent = data.cooldown_seconds + 's';
-            document.getElementById('pre_boom_seconds').value = data.pre_boom_seconds;
-            document.getElementById('preBoomValue').textContent = parseFloat(data.pre_boom_seconds).toFixed(1) + 's';
-            document.getElementById('post_boom_seconds').value = data.post_boom_seconds;
-            document.getElementById('postBoomValue').textContent = parseFloat(data.post_boom_seconds).toFixed(1) + 's';
-            updateThresholdLine();
-        });
+socket.on('recording_deleted', function(data) {
+    var el = document.getElementById('rec_' + data.name);
+    if (el) el.remove();
+    var list = document.getElementById('recordingsList');
+    if (!list.querySelector('.recording-item')) {
+        list.innerHTML = '<div class="history-empty">No recordings yet</div>';
+        document.getElementById('recordingsHint').textContent = '';
+    }
+});
 
-        // Load history
-        socket.on('history', function(data) {
-            var list = document.getElementById('historyList');
-            if (data.items.length === 0) return;
-            list.innerHTML = '';
-            document.getElementById('boomCount').textContent = data.today_count;
-            data.items.forEach(function(item) {
-                var el = document.createElement('div');
-                el.className = 'history-item';
-                el.innerHTML = '<span class="history-time">' + item.time + '</span>' +
-                    '<span>Duration: ' + item.duration.toFixed(1) + 's</span>' +
-                    '<span class="history-rms">RMS: ' + item.rms.toFixed(4) + '</span>';
-                list.appendChild(el);
-            });
-        });
-
-        function resetDefaults() {
-            document.getElementById('threshold').value = 0.15;
-            document.getElementById('thresholdValue').textContent = '0.15';
-            document.getElementById('cooldown_seconds').value = 5;
-            document.getElementById('cooldownValue').textContent = '5s';
-            document.getElementById('pre_boom_seconds').value = 1.0;
-            document.getElementById('preBoomValue').textContent = '1.0s';
-            document.getElementById('post_boom_seconds').value = 1.5;
-            document.getElementById('postBoomValue').textContent = '1.5s';
-            threshold = 0.15;
-            updateThresholdLine();
-            saveSettings();
-        }
-
-        // ALSA device selector
-        socket.on('alsa_devices', function(data) {
-            var sel = document.getElementById('alsaDevice');
-            sel.innerHTML = '';
-            data.devices.forEach(function(d) {
-                var opt = document.createElement('option');
-                opt.value = d.id;
-                opt.textContent = d.name + ' (' + d.id + ')';
-                if (d.id === data.current) opt.selected = true;
-                sel.appendChild(opt);
-            });
-        });
-
-        function setAlsaDevice(device) {
-            socket.emit('set_alsa_device', { device: device });
-        }
-
-        // Volume slider
-        var volumeSlider = document.getElementById('volumeSlider');
-        var volumeValue = document.getElementById('volumeValue');
-        volumeSlider.addEventListener('input', function() {
-            volumeValue.textContent = this.value;
-            socket.emit('set_volume', { level: parseInt(this.value) });
-        });
-
-        socket.on('volume', function(data) {
-            volumeSlider.value = data.level;
-            volumeSlider.max = data.max;
-            volumeValue.textContent = data.level;
-        });
-
-        updateThresholdLine();
-    </script>
+updateThresholdLine();
+</script>
 </body>
 </html>

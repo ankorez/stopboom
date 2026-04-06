@@ -8,5 +8,17 @@
   "device": null,
   "alsa_device": null,
   "output_sample_rate": 48000,
-  "replay_mode": "echo"
+  "replay_mode": "echo",
+  "ps4_vibration": false,
+  "vibration_intensity": 100,
+  "schedule_enabled": false,
+  "schedule_start": "22:00",
+  "schedule_end": "08:00",
+  "night_mode_enabled": false,
+  "night_mode_start": "22:00",
+  "night_mode_end": "08:00",
+  "night_threshold": 0.10,
+  "night_replay_mode": "echo",
+  "max_booms_per_hour": 0,
+  "save_recordings": false
 }
